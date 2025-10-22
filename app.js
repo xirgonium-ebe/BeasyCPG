@@ -17,13 +17,12 @@ const state = {
   },
   properties: [],
   associations: [],
-  dynlists: [] // { listName, listPath, entries:[{code,value,locale,active,order,parent}] }
+  dynlists: []
 };
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
-
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return;
@@ -41,55 +40,28 @@ function loadState() {
 // --- Helpers ----------------------------------------------------------------
 function $(sel, root=document){ return root.querySelector(sel); }
 function $all(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
-
-function escXml(s=""){
-  return String(s)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
-}
-
-function detectDelimiter(line) {
-  if (line.includes("\t")) return "\t";
-  if (line.includes(";")) return ";";
-  if (line.includes(",")) return ",";
-  return ";";
-}
-
+function escXml(s=""){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function detectDelimiter(line){ if(line.includes("\t"))return"\t"; if(line.includes(";"))return";"; if(line.includes(","))return","; return";"; }
 function parsePasted(text){
   const lines = text.split(/\r?\n/).filter(l=>l.trim().length>0);
-  if (lines.length === 0) return {header:[], rows:[]};
-
+  if (!lines.length) return {header:[],rows:[]};
   const delim = detectDelimiter(lines[0]);
   const header = lines[0].split(delim).map(h=>h.trim().toLowerCase());
   const rows = lines.slice(1).map(l => l.split(delim).map(x=>x.trim()));
-
-  // Map to objects by known headers
-  const headerIndex = (h) => header.indexOf(h);
+  const idx = h => header.indexOf(h);
   return {
     header,
-    rows: rows.map(cols=>{
-      const get = (h)=> {
-        const i = headerIndex(h);
-        return i >= 0 ? cols[i] : "";
-      };
-      return {
-        code: get("code"),
-        value: get("value"),
-        locale: get("locale"),
-        active: (get("active") || "true").toLowerCase() === "true",
-        order: Number(get("order") || "0"),
-        parent: get("parent")
-      };
-    })
+    rows: rows.map(cols=>({
+      code: idx("code")>=0 ? cols[idx("code")] : "",
+      value: idx("value")>=0 ? cols[idx("value")] : "",
+      locale: idx("locale")>=0 ? cols[idx("locale")] : "",
+      active: ((idx("active")>=0 ? cols[idx("active")] : "true")||"").toLowerCase()==="true",
+      order: Number(idx("order")>=0 ? cols[idx("order")] : "0"),
+      parent: idx("parent")>=0 ? cols[idx("parent")] : ""
+    }))
   };
 }
-
-function notify(msg) {
-  // Simple toastless notification
-  console.log(msg);
-  alert(msg);
-}
+function notify(msg){ console.log(msg); alert(msg); }
 
 // --- UI: Tabs ---------------------------------------------------------------
 $all(".tabs .tab").forEach(btn=>{
@@ -131,15 +103,39 @@ $("#formProject").addEventListener("submit", (e)=>{
   notify("Projet enregistré.");
 });
 
-// --- Properties -------------------------------------------------------------
+// --- Properties (CRUD + Edit mode) ------------------------------------------
+let editingPropIndex = null;
+
+function resetPropForm(){
+  const f = $("#formProperty");
+  f.reset();
+  editingPropIndex = null;
+  $("#propFormLegend").textContent = "Nouvelle propriété";
+  $("#btnSaveProp").textContent = "Ajouter propriété";
+  $("#btnCancelProp").style.display = "none";
+}
+function fillPropForm(p){
+  const f = $("#formProperty");
+  f.qnameLocal.value = p.qnameLocal || "";
+  f.title.value = p.title || "";
+  f.type.value = p.type || "d:text";
+  f.multiple.checked = !!p.multiple;
+  f.default.value = p.default || "";
+  f.mandatoryModel.checked = !!p.mandatoryModel;
+  f.mandatoryForm.checked = !!p.mandatoryForm;
+  f.readOnlyForm.checked = !!p.readOnlyForm;
+  f.constraintName.value = p.constraint?.name || "";
+  f.constraintType.value = p.constraint?.type || (state.project.settings.dynListConstraintQName || "bcpg:dynListConstraint");
+  f.dynPath.value = p.constraint?.params?.[state.project.settings.dynListPathParamName || "list-path"] || "";
+}
 function renderProperties() {
   const tb = $("#tblProperties tbody");
   tb.innerHTML = "";
   state.properties.forEach((p, idx)=>{
-    const tr = document.createElement("tr");
     const ns = state.project.namespacePrefix || "ns";
     const qname = `${ns}:${p.qnameLocal}`;
     const constraintLabel = p.constraint?.name ? `${p.constraint.name} (${p.constraint.type||""})` : "";
+    const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><code>${qname}</code></td>
       <td>${escXml(p.title||"")}</td>
@@ -150,20 +146,37 @@ function renderProperties() {
       <td>${p.mandatoryForm? "✓": ""}</td>
       <td>${p.readOnlyForm? "✓": ""}</td>
       <td>${escXml(constraintLabel)}</td>
-      <td><button class="btn btn-danger" data-del="${idx}">Suppr.</button></td>
+      <td>
+        <button class="btn" data-edit="${idx}">Éditer</button>
+        <button class="btn btn-danger" data-del="${idx}">Suppr.</button>
+      </td>
     `;
     tb.appendChild(tr);
   });
-  // bind deletes
-  $all('[data-del]').forEach(b=>{
+  // binds
+  $all('#tblProperties [data-del]').forEach(b=>{
     b.addEventListener("click", ()=>{
       const i = Number(b.dataset.del);
       state.properties.splice(i,1);
       saveState();
-      renderProperties();
+      renderProperties(); buildAllPreviews();
+      if (editingPropIndex === i) resetPropForm();
+    });
+  });
+  $all('#tblProperties [data-edit]').forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const i = Number(b.dataset.edit);
+      editingPropIndex = i;
+      $("#propFormLegend").textContent = "Éditer la propriété";
+      $("#btnSaveProp").textContent = "Mettre à jour";
+      $("#btnCancelProp").style.display = "inline-block";
+      fillPropForm(state.properties[i]);
+      // focus
+      $("#formProperty input[name='title']").focus();
     });
   });
 }
+$("#btnCancelProp").addEventListener("click", resetPropForm);
 
 $("#formProperty").addEventListener("submit",(e)=>{
   e.preventDefault();
@@ -179,32 +192,56 @@ $("#formProperty").addEventListener("submit",(e)=>{
     readOnlyForm: f.readOnlyForm.checked,
     constraint: null
   };
-  // constraint
   const cName = f.constraintName.value.trim();
   const cType = f.constraintType.value.trim();
   const dynPath = f.dynPath.value.trim();
   if (cName && cType) {
-    prop.constraint = {
-      name: cName,
-      type: cType,
-      params: {}
-    };
-    if (dynPath) {
-      prop.constraint.params[state.project.settings.dynListPathParamName || "list-path"] = dynPath;
+    prop.constraint = { name: cName, type: cType, params: {} };
+    if (dynPath) prop.constraint.params[state.project.settings.dynListPathParamName || "list-path"] = dynPath;
+  }
+
+  // create vs update
+  if (editingPropIndex === null) {
+    if (state.properties.some(p => p.qnameLocal === prop.qnameLocal)) {
+      notify("Nom technique déjà utilisé pour une autre propriété.");
+      return;
     }
+    state.properties.push(prop);
+  } else {
+    // empêcher collision si on change le nom
+    const duplicate = state.properties.some((p, i) => i!==editingPropIndex && p.qnameLocal===prop.qnameLocal);
+    if (duplicate) { notify("Nom technique déjà utilisé pour une autre propriété."); return; }
+    state.properties[editingPropIndex] = prop;
   }
-  // check duplicates
-  if (state.properties.some(p => p.qnameLocal === prop.qnameLocal)) {
-    notify("Nom technique déjà utilisé pour une autre propriété.");
-    return;
-  }
-  state.properties.push(prop);
   saveState();
-  e.currentTarget.reset();
-  renderProperties();
+  renderProperties(); buildAllPreviews();
+  resetPropForm();
 });
 
-// --- Associations -----------------------------------------------------------
+// --- Associations (CRUD + Edit mode) ----------------------------------------
+let editingAssocIndex = null;
+
+function resetAssocForm(){
+  const f = $("#formAssoc");
+  f.reset();
+  // valeur par défaut demandée : sourceMany = true
+  f.sourceMany.value = "true";
+  f.targetMany.value = "false";
+  editingAssocIndex = null;
+  $("#assocFormLegend").textContent = "Nouvelle association";
+  $("#btnSaveAssoc").textContent = "Ajouter association";
+  $("#btnCancelAssoc").style.display = "none";
+}
+function fillAssocForm(a){
+  const f = $("#formAssoc");
+  f.qnameLocal.value = a.qnameLocal || "";
+  f.title.value = a.title || "";
+  f.targetClass.value = a.targetClass || "cm:person";
+  f.mandatoryModel.checked = !!a.mandatoryModel;
+  f.mandatoryForm.checked = !!a.mandatoryForm;
+  f.sourceMany.value = a.sourceMany ? "true" : "false";
+  f.targetMany.value = a.targetMany ? "true" : "false";
+}
 function renderAssocs() {
   const tb = $("#tblAssocs tbody");
   tb.innerHTML = "";
@@ -220,7 +257,10 @@ function renderAssocs() {
       <td>${a.targetMany}</td>
       <td>${a.mandatoryModel? "✓": ""}</td>
       <td>${a.mandatoryForm? "✓": ""}</td>
-      <td><button class="btn btn-danger" data-del="${idx}">Suppr.</button></td>
+      <td>
+        <button class="btn" data-edit="${idx}">Éditer</button>
+        <button class="btn btn-danger" data-del="${idx}">Suppr.</button>
+      </td>
     `;
     tb.appendChild(tr);
   });
@@ -229,10 +269,23 @@ function renderAssocs() {
       const i = Number(b.dataset.del);
       state.associations.splice(i,1);
       saveState();
-      renderAssocs();
+      renderAssocs(); buildAllPreviews();
+      if (editingAssocIndex === i) resetAssocForm();
+    });
+  });
+  $all('#tblAssocs [data-edit]').forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const i = Number(b.dataset.edit);
+      editingAssocIndex = i;
+      $("#assocFormLegend").textContent = "Éditer l'association";
+      $("#btnSaveAssoc").textContent = "Mettre à jour";
+      $("#btnCancelAssoc").style.display = "inline-block";
+      fillAssocForm(state.associations[i]);
+      $("#formAssoc input[name='title']").focus();
     });
   });
 }
+$("#btnCancelAssoc").addEventListener("click", resetAssocForm);
 
 $("#formAssoc").addEventListener("submit",(e)=>{
   e.preventDefault();
@@ -246,27 +299,58 @@ $("#formAssoc").addEventListener("submit",(e)=>{
     mandatoryModel: f.mandatoryModel.checked,
     mandatoryForm: f.mandatoryForm.checked
   };
-  if (state.associations.some(a => a.qnameLocal === assoc.qnameLocal)) {
-    notify("Nom technique déjà utilisé pour une autre association.");
-    return;
+
+  if (editingAssocIndex === null) {
+    if (state.associations.some(a => a.qnameLocal === assoc.qnameLocal)) {
+      notify("Nom technique déjà utilisé pour une autre association.");
+      return;
+    }
+    state.associations.push(assoc);
+  } else {
+    const duplicate = state.associations.some((a,i)=> i!==editingAssocIndex && a.qnameLocal===assoc.qnameLocal);
+    if (duplicate) { notify("Nom technique déjà utilisé pour une autre association."); return; }
+    state.associations[editingAssocIndex] = assoc;
   }
-  state.associations.push(assoc);
   saveState();
-  e.currentTarget.reset();
-  renderAssocs();
+  renderAssocs(); buildAllPreviews();
+  resetAssocForm();
 });
 
-// --- DynLists ---------------------------------------------------------------
+// --- DynLists (CRUD + Edit mode) --------------------------------------------
 let lastParsedDyn = [];
+let editingDynIndex = null;
 
 $("#btnParseDyn").addEventListener("click", ()=>{
   const f = $("#formDyn");
-  const txt = f.pasted.value;
-  const parsed = parsePasted(txt);
+  const parsed = parsePasted(f.pasted.value||"");
   lastParsedDyn = parsed.rows;
   notify(`Analyse OK : ${lastParsedDyn.length} ligne(s).`);
 });
 
+function resetDynForm(){
+  const f = $("#formDyn");
+  f.reset();
+  editingDynIndex = null;
+  lastParsedDyn = [];
+  $("#dynFormLegend").textContent = "Nouvelle DynList";
+  $("#btnSaveDyn").textContent = "Ajouter DynList";
+  $("#btnCancelDyn").style.display = "none";
+}
+function fillDynForm(d){
+  const f = $("#formDyn");
+  f.listName.value = d.listName || "";
+  f.listPath.value = d.listPath || "";
+  // On remplit la zone avec le CSV actuel
+  const lines = ["code;value;locale;active;order;parent"];
+  d.entries.forEach(e=>{
+    lines.push(
+      [e.code||"",e.value||"",e.locale||"", e.active===false?"false":"true", String(Number(e.order||0)), e.parent||""]
+      .join(";")
+    );
+  });
+  f.pasted.value = lines.join("\n");
+  lastParsedDyn = d.entries.slice();
+}
 function renderDyn() {
   const tb = $("#tblDyn tbody");
   tb.innerHTML = "";
@@ -276,7 +360,10 @@ function renderDyn() {
       <td><code>${escXml(d.listName)}</code></td>
       <td>${escXml(d.listPath)}</td>
       <td>${d.entries.length}</td>
-      <td><button class="btn btn-danger" data-del="${idx}">Suppr.</button></td>
+      <td>
+        <button class="btn" data-edit="${idx}">Éditer</button>
+        <button class="btn btn-danger" data-del="${idx}">Suppr.</button>
+      </td>
     `;
     tb.appendChild(tr);
   });
@@ -285,10 +372,23 @@ function renderDyn() {
       const i = Number(b.dataset.del);
       state.dynlists.splice(i,1);
       saveState();
-      renderDyn();
+      renderDyn(); buildAllPreviews();
+      if (editingDynIndex === i) resetDynForm();
+    });
+  });
+  $all('#tblDyn [data-edit]').forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const i = Number(b.dataset.edit);
+      editingDynIndex = i;
+      $("#dynFormLegend").textContent = "Éditer la DynList";
+      $("#btnSaveDyn").textContent = "Mettre à jour";
+      $("#btnCancelDyn").style.display = "inline-block";
+      fillDynForm(state.dynlists[i]);
+      $("#formDyn input[name='listName']").focus();
     });
   });
 }
+$("#btnCancelDyn").addEventListener("click", resetDynForm);
 
 $("#formDyn").addEventListener("submit",(e)=>{
   e.preventDefault();
@@ -296,16 +396,26 @@ $("#formDyn").addEventListener("submit",(e)=>{
   const listName = f.listName.value.trim();
   const listPath = f.listPath.value.trim();
   if (!listName || !listPath) { notify("Nom et chemin requis."); return; }
-  if (state.dynlists.some(d => d.listName === listName)) {
-    notify("Nom de liste déjà utilisé.");
-    return;
+
+  // si l'utilisateur n'a pas cliqué "Analyser" après édition, on essaye de parser au submit
+  if (!lastParsedDyn.length && (f.pasted.value||"").trim().length){
+    lastParsedDyn = parsePasted(f.pasted.value).rows;
   }
-  const entries = lastParsedDyn.length ? lastParsedDyn.slice() : [];
-  state.dynlists.push({ listName, listPath, entries });
+
+  if (editingDynIndex === null) {
+    if (state.dynlists.some(d => d.listName === listName)) {
+      notify("Nom de liste déjà utilisé.");
+      return;
+    }
+    state.dynlists.push({ listName, listPath, entries: lastParsedDyn.slice() });
+  } else {
+    const duplicate = state.dynlists.some((d,i)=> i!==editingDynIndex && d.listName===listName);
+    if (duplicate) { notify("Nom de liste déjà utilisé."); return; }
+    state.dynlists[editingDynIndex] = { listName, listPath, entries: lastParsedDyn.slice() };
+  }
   saveState();
-  e.currentTarget.reset();
-  lastParsedDyn = [];
-  renderDyn();
+  renderDyn(); buildAllPreviews();
+  resetDynForm();
 });
 
 // --- Preview generation ------------------------------------------------------
@@ -336,7 +446,6 @@ function buildModelProperties(includeContainers){
   if (includeContainers && state.project.settings.containerProperties) lines.push("</properties>");
   return lines.join("\n");
 }
-
 function buildModelAssociations(includeContainers){
   if (!state.project.settings.containerAssociations && includeContainers) includeContainers = false;
   const ns = state.project.namespacePrefix || "ns";
@@ -359,11 +468,9 @@ function buildModelAssociations(includeContainers){
   if (includeContainers) lines.push("</associations>");
   return lines.join("\n");
 }
-
 function buildConstraints(includeContainers){
   const lines = [];
   const seen = new Set();
-  // constraints from properties
   state.properties.forEach(p=>{
     if (p.constraint && !seen.has(p.constraint.name)) {
       seen.add(p.constraint.name);
@@ -380,7 +487,6 @@ function buildConstraints(includeContainers){
   if (includeContainers) lines.push("</constraints>");
   return lines.join("\n");
 }
-
 function buildShow(){
   const ns = state.project.namespacePrefix || "ns";
   const out = [];
@@ -388,7 +494,6 @@ function buildShow(){
   state.associations.forEach(a=> out.push(`<show id="${ns}:${a.qnameLocal}" />`));
   return out.join("\n");
 }
-
 function buildField(){
   const ns = state.project.namespacePrefix || "ns";
   const out = [];
@@ -401,7 +506,6 @@ function buildField(){
   state.associations.forEach(a=>{
     out.push(`<field id="${ns}:${a.qnameLocal}">`);
     out.push(`  <mandatory>${!!a.mandatoryForm}</mandatory>`);
-    // Exemple de control picker pour cm:person (facultatif, basique)
     if (a.targetClass === "cm:person") {
       out.push(`  <control template="/org/alfresco/components/form/controls/authority.ftl">`);
       out.push(`    <control-param name="allowMultipleSelections">${a.targetMany}</control-param>`);
@@ -412,7 +516,6 @@ function buildField(){
   });
   return out.join("\n");
 }
-
 function buildAllPreviews(){
   const includeContainers = !!state.project.settings.includeContainers;
   $("#outProps").value = buildModelProperties(includeContainers);
@@ -421,14 +524,12 @@ function buildAllPreviews(){
   $("#outShow").value = buildShow();
   $("#outField").value = buildField();
 }
-
 $("#btnBuild").addEventListener("click", buildAllPreviews);
 
 // Copy buttons
 $all(".btn-copy").forEach(b=>{
   b.addEventListener("click", async ()=>{
-    const sel = b.dataset.copy;
-    const el = $(sel);
+    const el = $(b.dataset.copy);
     await navigator.clipboard.writeText(el.value || el.textContent || "");
     b.textContent = "Copié !";
     setTimeout(()=> b.textContent="Copier", 900);
@@ -444,14 +545,12 @@ $("#btnExportJSON").addEventListener("click", ()=>{
   a.click();
   URL.revokeObjectURL(a.href);
 });
-
 $("#fileImportJSON").addEventListener("change", async (e)=>{
   const file = e.target.files[0];
   if (!file) return;
   const text = await file.text();
   try{
     const obj = JSON.parse(text);
-    // minimal merge
     Object.assign(state.project, obj.project || {});
     state.properties = obj.properties || [];
     state.associations = obj.associations || [];
@@ -469,7 +568,6 @@ $("#fileImportJSON").addEventListener("change", async (e)=>{
     e.target.value = "";
   }
 });
-
 $("#btnReset").addEventListener("click", ()=>{
   if (!confirm("Réinitialiser le projet (localStorage) ?")) return;
   localStorage.removeItem(STORAGE_KEY);
@@ -478,24 +576,17 @@ $("#btnReset").addEventListener("click", ()=>{
 
 // --- ZIP Download ------------------------------------------------------------
 $("#btnDownloadZip").addEventListener("click", async ()=>{
-  // Regénère avant export
   buildAllPreviews();
-
   const zip = new JSZip();
   const files = [];
-
-  // Model fragments
   files.push({path:"model/fragment-model-properties.xml", content: $("#outProps").value});
   files.push({path:"model/fragment-model-associations.xml", content: $("#outAssocs").value});
   if ($("#outConstraints").value.trim().length){
     files.push({path:"model/fragment-model-constraints.xml", content: $("#outConstraints").value});
   }
-
-  // Share
   files.push({path:"share/fragment-share-show.xml", content: $("#outShow").value});
   files.push({path:"share/fragment-share-field.xml", content: $("#outField").value});
 
-  // CSV for DynLists (semicolon by default)
   state.dynlists.forEach(d=>{
     const lines = [];
     lines.push("code;value;locale;active;order;parent");
@@ -513,7 +604,6 @@ $("#btnDownloadZip").addEventListener("click", async ()=>{
     files.push({path:`constraints/${d.listName}.csv`, content: lines.join("\n")});
   });
 
-  // README
   const readme = `# Fragments générés
 
 Projet: ${state.project.name || "-"}
@@ -531,8 +621,6 @@ Namespace: ${state.project.namespacePrefix || "ns"} (${state.project.namespaceUr
 > QName contrainte: ${state.project.settings.dynListConstraintQName || "bcpg:dynListConstraint"}
 `;
   files.push({path:"README.md", content: readme});
-
-  // project.json for versioning
   files.push({path:"project.json", content: JSON.stringify(state, null, 2)});
 
   files.forEach(f=> zip.file(f.path, f.content));
@@ -552,3 +640,7 @@ renderProperties();
 renderAssocs();
 renderDyn();
 buildAllPreviews();
+
+// Assurer la valeur par défaut de sourceMany=true quand on arrive sur l’onglet Associations
+// (utile si le navigateur a gardé un ancien état du form)
+$("#formAssoc select[name='sourceMany']").value ||= "true";
