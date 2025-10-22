@@ -380,6 +380,24 @@ PURPLE:Violet"></textarea>
   </footer>
 
   <script src="app.js"></script>
-
+  <script>
+(function(){
+  function ensureDefault(){
+    if (!location.hash || !document.querySelector(location.hash)) {
+      location.replace('#tab-project');
+    }
+  }
+  function setActive(){
+    const hash = location.hash;
+    document.querySelectorAll('.tabs .tab').forEach(a=>a.removeAttribute('aria-current'));
+    const active = Array.from(document.querySelectorAll('.tabs .tab'))
+      .find(a => a.getAttribute('href') === hash);
+    if (active) active.setAttribute('aria-current','page');
+  }
+  ensureDefault();
+  setActive();
+  window.addEventListener('hashchange', setActive);
+})();
+</script>
 </body>
 </html>
