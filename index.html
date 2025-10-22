@@ -61,10 +61,6 @@
           <div class="inline">
             <label class="check"><input type="checkbox" name="includeContainers" checked />
               Inclure &lt;properties&gt; / &lt;associations&gt; / &lt;constraints&gt;</label>
-            <label class="check"><input type="checkbox" name="showForce" />
-              Ajouter force="true" sur &lt;show&gt;</label>
-            <label class="check"><input type="checkbox" name="showForMode" />
-              Ajouter for-mode="true" sur &lt;show&gt;</label>
           </div>
         </fieldset>
 
@@ -153,6 +149,14 @@
             </label>
           </div>
 
+          <div class="grid-3">
+            <label class="check"><input type="checkbox" name="showForce" /> &lt;show&gt; force="true"</label>
+            <label class="check"><input type="checkbox" name="showForMode" /> &lt;show&gt; for-mode="true"</label>
+            <label>DynList appliquée
+              <select name="linkDynList"><option value="">— aucune —</option></select>
+            </label>
+          </div>
+
           <div id="propAssocOptions" class="grid-3" style="display:none">
             <label>Datasource (ds)
               <input name="assocDs" placeholder="becpg/autocomplete/targetassoc/associations/..." />
@@ -174,27 +178,6 @@
           </div>
         </fieldset>
 
-        <fieldset>
-          <legend>Contrainte DynList (beCPG)</legend>
-          <div class="grid-3">
-            <label>Nom de la contrainte
-              <input name="constraintName" placeholder="ex: brn:goDecisionList" />
-            </label>
-            <label>Path (cm:... de la liste)
-              <input name="dynPath" placeholder="/System/Lists/bcpg:entityLists/ma_liste" />
-            </label>
-            <label>DynList du projet
-              <select name="linkDynList">
-                <option value="">— aucune —</option>
-              </select>
-            </label>
-          </div>
-          <div class="inline">
-            <button type="button" id="btnCreateDynFromProp" class="btn">+ Créer DynList depuis cette propriété</button>
-          </div>
-          <p class="small-muted">La contrainte générée fixe constraintType=bcpg:listValue, constraintProp=bcpg:lvValue, addEmptyValue=true (seuls name et path sont éditables).</p>
-        </fieldset>
-
         <div class="row-actions">
           <button type="submit" class="btn btn-primary" id="btnSaveProp">Ajouter propriété</button>
           <button type="button" class="btn" id="btnCancelProp" style="display:none">Annuler</button>
@@ -206,7 +189,7 @@
         <table id="tblProperties" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th><th>Mand(M)</th><th>Mand(F)</th><th>RO(F)</th><th>Constraint</th><th>Field set</th><th></th>
+              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th><th>Mand(M)</th><th>Mand(F)</th><th>RO(F)</th><th>DynList</th><th>Field set</th><th>Show opts</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -262,6 +245,13 @@
               <label>pageLinkTemplate (optionnel)
                 <input name="assocPageLinkTemplate" placeholder="entity-data-lists?list=...&amp;nodeRef={nodeRef}" />
               </label>
+              <label class="check"><input type="checkbox" name="showForce" /> &lt;show&gt; force="true"</label>
+            </div>
+            <div class="grid-3">
+              <label class="check"><input type="checkbox" name="showForMode" /> &lt;show&gt; for-mode="true"</label>
+              <label>DynList appliquée
+                <select name="linkDynList"><option value="">— aucune —</option></select>
+              </label>
               <div></div>
             </div>
           </fieldset>
@@ -278,7 +268,7 @@
         <table id="tblAssocs" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th><th>Mand(M)</th><th>Mand(F)</th><th>Field set</th><th></th>
+              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th><th>Mand(M)</th><th>Mand(F)</th><th>Field set</th><th>DynList</th><th>Show opts</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
