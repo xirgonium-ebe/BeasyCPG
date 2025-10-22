@@ -512,46 +512,60 @@ const Dyn = (()=>{
   }
 
   function bind(){
-    $("#btnParseDyn").addEventListener("click", ()=>{
-      const f = $("#formDyn");
-      lastParsed = parsePastedSimple(f.pasted.value);
-      toast(`Analyse OK : ${lastParsed.length} ligne(s).`);
-    });
-    $("#btnInlineAdd").addEventListener("click", ()=>{
-      const f = $("#formDyn");
-      const e = { code:(f.il_code.value||"").trim(), value:(f.il_value.value||"").trim() };
-      if (!e.code && !e.value){ toast("Code ou Value requis."); return; }
-      lastParsed.push(e);
-      f.il_code.value = ""; f.il_value.value = "";
-    });
-    $("#btnCancelDyn").addEventListener("click", resetForm);
+  const btnParse = document.getElementById("btnParseDyn");
+  const btnAdd   = document.getElementById("btnInlineAdd");
+  const btnCancel= document.getElementById("btnCancelDyn");
+  const form     = document.getElementById("formDyn");
 
-    $("#formDyn").addEventListener("submit",(e)=>{
-      e.preventDefault();
-      const f = e.currentTarget;
-      const listName = f.listName.value.trim();
-      const listPath = f.listPath.value.trim();
-      if (!listName || !listPath){ toast("Nom et path requis."); return; }
-      if (!lastParsed.length && (f.pasted.value||"").trim().length){
+  if (!form) { console.error("[Dyn] #formDyn introuvable"); return; }
+
+  btnParse?.addEventListener("click", ()=>{
+    try{
+      const f = form;
+      lastParsed = parsePastedSimple(f.pasted?.value || "");
+      alert(`Analyse OK : ${lastParsed.length} ligne(s).`);
+    }catch(err){ console.error("[Dyn] parse error", err); alert("Erreur d'analyse DynList (voir console)"); }
+  });
+
+  btnAdd?.addEventListener("click", ()=>{
+    try{
+      const f = form;
+      const e = { code:(f.il_code?.value||"").trim(), value:(f.il_value?.value||"").trim() };
+      if (!e.code && !e.value){ alert("Code ou Value requis."); return; }
+      lastParsed.push(e);
+      if (f.il_code) f.il_code.value = "";
+      if (f.il_value) f.il_value.value = "";
+    }catch(err){ console.error("[Dyn] inline add error", err); alert("Erreur d'ajout inline (voir console)"); }
+  });
+
+  btnCancel?.addEventListener("click", resetForm);
+
+  form.addEventListener("submit",(e)=>{
+    e.preventDefault();
+    try{
+      const f = form;
+      const listName = (f.listName?.value || "").trim();
+      const listPath = (f.listPath?.value || "").trim();
+      if (!listName || !listPath){ alert("Nom et path requis."); return; }
+      if (!lastParsed.length && (f.pasted?.value || "").trim().length){
         lastParsed = parsePastedSimple(f.pasted.value);
       }
-
       if (editingIndex === null){
-        if (state.dynlists.some(d=>d.listName===listName)){ toast("Nom de liste déjà utilisé."); return; }
+        if (state.dynlists.some(d=>d.listName===listName)){ alert("Nom de liste déjà utilisé."); return; }
         state.dynlists.push({ listName, listPath, entries: lastParsed.slice() });
       } else {
         const dup = state.dynlists.some((d,i)=> i!==editingIndex && d.listName===listName);
-        if (dup){ toast("Nom de liste déjà utilisé."); return; }
+        if (dup){ alert("Nom de liste déjà utilisé."); return; }
         const oldName = state.dynlists[editingIndex].listName;
         state.dynlists[editingIndex] = { listName, listPath, entries: lastParsed.slice() };
-        // si le nom a changé, recaler les propriétés qui pointaient dessus
         if (oldName !== listName){
           state.properties.forEach(p=> { if (p.linkDynList===oldName) p.linkDynList=listName; });
         }
       }
       saveState(); render(); Properties.feedDynSelect(); Preview.buildAll(); resetForm();
-    });
-  }
+    }catch(err){ console.error("[Dyn] submit error", err); alert("Erreur de sauvegarde DynList (voir console)"); }
+  });
+}
 
   return { render, bind, resetForm };
 })();
