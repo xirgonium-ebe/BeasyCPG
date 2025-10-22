@@ -34,52 +34,55 @@
       <form id="formProject" class="form-grid">
         <fieldset>
           <legend>Infos projet</legend>
-          <label>
-            Nom du projet
-            <input name="projectName" placeholder="ex: My project" />
+          <label>Nom du projet
+            <input name="projectName" placeholder="ex: Adisseo Labeling" />
           </label>
-          <label>
-            Namespace prefix
-            <input name="nsPrefix" placeholder="ex: ebe" />
+          <label>Namespace prefix
+            <input name="nsPrefix" placeholder="ex: brn" />
           </label>
-          <label>
-            Namespace URI
-            <input name="nsUri" placeholder="ex: http://example.com/ebe/1.0" />
+          <label>Namespace URI
+            <input name="nsUri" placeholder="ex: http://example.com/brn/1.0" />
           </label>
         </fieldset>
 
         <fieldset>
           <legend>Paramètres généraux</legend>
-          <label>
-            QName contrainte DynList
-            <input name="dynQName" value="bcpg:dynListConstraint" />
-          </label>
-          <label>
-            Nom du paramètre “chemin de liste”
-            <input name="dynPathParam" value="list-path" />
-          </label>
-          <label>
-            Locale par défaut
-            <input name="defaultLocale" value="fr" />
-          </label>
-          <label class="check">
-            <input type="checkbox" name="includeContainers" checked />
-            Inclure les balises conteneurs (&lt;properties&gt;, &lt;associations&gt;, &lt;constraints&gt;)
-          </label>
+          <div class="grid-3">
+            <label>QName contrainte DynList
+              <input name="dynQName" value="fr.becpg.repo.dictionary.constraint.DynListConstraint" />
+            </label>
+            <label>Paramètre “path”
+              <input name="dynPathParam" value="path" />
+            </label>
+            <label>Locale par défaut
+              <input name="defaultLocale" value="fr" />
+            </label>
+          </div>
+          <div class="inline">
+            <label class="check"><input type="checkbox" name="includeContainers" checked />
+              Inclure &lt;properties&gt; / &lt;associations&gt; / &lt;constraints&gt;</label>
+            <label class="check"><input type="checkbox" name="showForce" />
+              Ajouter force="true" sur &lt;show&gt;</label>
+            <label class="check"><input type="checkbox" name="showForMode" />
+              Ajouter for-mode="true" sur &lt;show&gt;</label>
+          </div>
         </fieldset>
 
         <fieldset>
-          <legend>Conteneur de définitions</legend>
+          <legend>Conteneurs & Sets</legend>
           <div class="inline">
-            <label class="check">
-              <input type="checkbox" name="containerProperties" checked />
-              Générer des propriétés
-            </label>
-            <label class="check">
-              <input type="checkbox" name="containerAssociations" checked />
-              Générer des associations
-            </label>
+            <label class="check"><input type="checkbox" name="containerProperties" checked /> Générer des propriétés</label>
+            <label class="check"><input type="checkbox" name="containerAssociations" checked /> Générer des associations</label>
           </div>
+          <div>
+            <label>Sets disponibles (attribut <code>set</code> des &lt;field&gt;)</label>
+            <div class="inline">
+              <input name="newFieldSet" placeholder="ex: referentialData" />
+              <button type="button" id="btnAddFieldSet" class="btn">Ajouter set</button>
+            </div>
+            <p class="small-muted">Ces sets seront proposés dans les formulaires Propriété/Association.</p>
+          </div>
+          <ul id="ulFieldSets" class="small-muted"></ul>
         </fieldset>
 
         <div class="row-actions">
@@ -94,16 +97,13 @@
         <fieldset>
           <legend><span id="propFormLegend">Nouvelle propriété</span></legend>
           <div class="grid-3">
-            <label>
-              Nom technique (local)
-              <input name="qnameLocal" placeholder="ex: myProp" required />
+            <label>Nom technique (local)
+              <input name="qnameLocal" placeholder="ex: go1Decision" required />
             </label>
-            <label>
-              Title (libellé)
-              <input name="title" placeholder="ex: My funny property" />
+            <label>Title (libellé)
+              <input name="title" placeholder="ex: Décision GO1" />
             </label>
-            <label>
-              Type (Alfresco)
+            <label>Type (Alfresco)
               <select name="type">
                 <option>d:text</option>
                 <option>d:mltext</option>
@@ -114,17 +114,19 @@
                 <option>d:date</option>
                 <option>d:datetime</option>
                 <option>d:content</option>
+                <option>d:nodeRef</option>
               </select>
             </label>
           </div>
 
           <div class="grid-3">
             <label class="check"><input type="checkbox" name="multiple" /> Multiple</label>
-            <label>
-              Valeur par défaut
+            <label>Valeur par défaut
               <input name="default" />
             </label>
-            <div></div>
+            <label>Label ID (optionnel)
+              <input name="labelId" placeholder="ex: becpg.forms.field.tradeName" />
+            </label>
           </div>
 
           <div class="grid-3">
@@ -132,24 +134,65 @@
             <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
             <label class="check"><input type="checkbox" name="readOnlyForm" /> Read-only (form)</label>
           </div>
+
+          <div class="grid-3">
+            <label>Field set (<code>set</code>)
+              <select name="fieldSet"></select>
+            </label>
+            <label>Contrôle de field
+              <select name="fieldControl">
+                <option value="auto">Auto (par type)</option>
+                <option value="textfield">Texte (textfield.ftl)</option>
+                <option value="textarea">Texte long (textarea.ftl)</option>
+                <option value="assoc-auto">Association (autocomplete-association.ftl)</option>
+                <option value="noderef-auto">NodeRef / Hiérarchie (autocomplete.ftl)</option>
+              </select>
+            </label>
+            <label>Max length (si textfield)
+              <input name="maxLength" type="number" min="0" placeholder="ex: 40" />
+            </label>
+          </div>
+
+          <div id="propAssocOptions" class="grid-3" style="display:none">
+            <label>Datasource (ds)
+              <input name="assocDs" placeholder="becpg/autocomplete/targetassoc/associations/..." />
+            </label>
+            <label>pageLinkTemplate (optionnel)
+              <input name="assocPageLinkTemplate" placeholder="entity-data-lists?list=...&amp;nodeRef={nodeRef}" />
+            </label>
+            <div></div>
+          </div>
+
+          <div id="propNodeRefOptions" class="grid-3" style="display:none">
+            <label>Datasource (ds)
+              <input name="nrDs" placeholder="becpg/autocomplete/linkedvalue/values/System/..." />
+            </label>
+            <label>Niveaux de hiérarchie (>=1)
+              <input name="nrLevels" type="number" min="1" value="1" />
+            </label>
+            <div></div>
+          </div>
         </fieldset>
 
         <fieldset>
-          <legend>Contrainte (optionnelle)</legend>
+          <legend>Contrainte DynList (beCPG)</legend>
           <div class="grid-3">
-            <label>
-              Nom de la contrainte
-              <input name="constraintName" placeholder="ex: brn:goDecisionList" />
+            <label>Nom de la contrainte
+              <input name="constraintName" placeholder="ex: brn:goDecisionConstraint" />
             </label>
-            <label>
-              Type de contrainte
-              <input name="constraintType" value="bcpg:dynListConstraint" />
+            <label>Path (cm:... de la liste)
+              <input name="dynPath" placeholder="/System/Lists/bcpg:entityLists/ma_liste" />
             </label>
-            <label>
-              Chemin de la liste (DynList)
-              <input name="dynPath" placeholder="/app:company_home/cm:System/cm:Lists/bcpg:entityLists/cm:ma_liste" />
+            <label>DynList du projet
+              <select name="linkDynList">
+                <option value="">— aucune —</option>
+              </select>
             </label>
           </div>
+          <div class="inline">
+            <button type="button" id="btnCreateDynFromProp" class="btn">+ Créer DynList depuis cette propriété</button>
+          </div>
+          <p class="small-muted">La contrainte générée utilise DynListConstraint (beCPG) avec constraintType=bcpg:listValue, constraintProp=bcpg:lvValue, addEmptyValue=true. Seuls <strong>name</strong> et <strong>path</strong> sont modifiables.</p>
         </fieldset>
 
         <div class="row-actions">
@@ -163,7 +206,7 @@
         <table id="tblProperties" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th><th>Def</th><th>Mand(M)</th><th>Mand(F)</th><th>RO(F)</th><th>Constraint</th><th></th>
+              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th><th>Mand(M)</th><th>Mand(F)</th><th>RO(F)</th><th>Constraint</th><th>Field set</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -177,23 +220,22 @@
         <fieldset>
           <legend><span id="assocFormLegend">Nouvelle association</span></legend>
           <div class="grid-3">
-            <label>
-              Nom technique (local)
-              <input name="qnameLocal" placeholder="ex: myAssoc" required />
+            <label>Nom technique (local)
+              <input name="qnameLocal" placeholder="ex: actorProjectLeader" required />
             </label>
-            <label>
-              Title
-              <input name="title" placeholder="ex: My lovely association" />
+            <label>Title
+              <input name="title" placeholder="ex: Project Leader" />
             </label>
-            <label>
-              Classe cible
+            <label>Classe cible
               <input name="targetClass" value="cm:person" />
             </label>
           </div>
           <div class="grid-3">
             <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
             <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
-            <div></div>
+            <label>Field set
+              <select name="fieldSet"></select>
+            </label>
           </div>
           <div class="grid-3">
             <label>Source many
@@ -210,7 +252,21 @@
             </label>
             <div></div>
           </div>
+
+          <fieldset>
+            <legend>Contrôle (association)</legend>
+            <div class="grid-3">
+              <label>Datasource (ds)
+                <input name="assocDs" placeholder="becpg/autocomplete/targetassoc/associations/..." />
+              </label>
+              <label>pageLinkTemplate (optionnel)
+                <input name="assocPageLinkTemplate" placeholder="entity-data-lists?list=...&amp;nodeRef={nodeRef}" />
+              </label>
+              <div></div>
+            </div>
+          </fieldset>
         </fieldset>
+
         <div class="row-actions">
           <button type="submit" class="btn btn-primary" id="btnSaveAssoc">Ajouter association</button>
           <button type="button" class="btn" id="btnCancelAssoc" style="display:none">Annuler</button>
@@ -222,7 +278,7 @@
         <table id="tblAssocs" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th><th>Mand(M)</th><th>Mand(F)</th><th></th>
+              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th><th>Mand(M)</th><th>Mand(F)</th><th>Field set</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -235,23 +291,39 @@
       <form id="formDyn" class="form-grid">
         <fieldset>
           <legend><span id="dynFormLegend">Nouvelle DynList</span></legend>
+
           <div class="grid-3">
             <label>Nom logique de la liste
-              <input name="listName" placeholder="ex: ebe_ufoFlyingMode" required />
+              <input name="listName" placeholder="ex: brn_goDecision" required />
             </label>
-            <label>Chemin dans Alfresco
-              <input name="listPath" placeholder="/app:company_home/cm:System/cm:Lists/bcpg:entityLists/cm:ebe_ufoFlyingMode" required />
+            <label>Path (cm:... dans /System/Lists/…)
+              <input name="listPath" placeholder="/System/Lists/bcpg:entityLists/brn_goDecision" required />
             </label>
             <div></div>
           </div>
-          <label>
-            Coller vos lignes (CSV/TSV) – colonnes supportées : code;value;locale;active;order;parent
-            <textarea name="pasted" rows="8" placeholder="code;value;locale;active;order
-GO;GO;fr;true;1
-NO_GO;NO GO;fr;true;2"></textarea>
+
+          <label>Coller vos lignes — format strict : <code>code:value</code> (une ligne par entrée)
+            <textarea name="pasted" rows="8" placeholder="GO:GO
+NO_GO:NO GO"></textarea>
           </label>
+
           <div class="row-actions">
             <button type="button" id="btnParseDyn" class="btn">Analyser</button>
+          </div>
+
+          <fieldset>
+            <legend>Ajout inline</legend>
+            <div class="grid-3">
+              <label>code <input name="il_code" /></label>
+              <label>value <input name="il_value" /></label>
+              <div></div>
+            </div>
+            <div class="row-actions">
+              <button type="button" id="btnInlineAdd" class="btn">+ Ajouter une ligne</button>
+            </div>
+          </fieldset>
+
+          <div class="row-actions">
             <button type="submit" class="btn btn-primary" id="btnSaveDyn">Ajouter DynList</button>
             <button type="button" class="btn" id="btnCancelDyn" style="display:none">Annuler</button>
           </div>
@@ -263,7 +335,7 @@ NO_GO;NO GO;fr;true;2"></textarea>
         <table id="tblDyn" class="table">
           <thead>
             <tr>
-              <th>Nom</th><th>Chemin</th><th>Entrées</th><th></th>
+              <th>Nom</th><th>Path</th><th>Entrées</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -311,7 +383,7 @@ NO_GO;NO GO;fr;true;2"></textarea>
             <h3>Share – &lt;field&gt;</h3>
             <button class="btn btn-copy" data-copy="#outField">Copier</button>
           </div>
-          <textarea id="outField" rows="14" readonly></textarea>
+          <textarea id="outField" rows="18" readonly></textarea>
         </div>
       </div>
 
