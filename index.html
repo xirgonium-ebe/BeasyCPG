@@ -380,5 +380,19 @@ PURPLE:Violet"></textarea>
   </footer>
 
   <script src="app.js"></script>
+  <script>
+(function(){
+  function setActive(){
+    const hash = location.hash || "#tab-project";
+    const links = document.querySelectorAll(".tabs .tab");
+    links.forEach(a => a.removeAttribute("aria-current"));
+    const active = Array.from(links).find(a => a.getAttribute("href") === hash);
+    if (active) active.setAttribute("aria-current","page");
+  }
+  if (!location.hash) location.hash = "#tab-project";
+  setActive();
+  window.addEventListener("hashchange", setActive);
+})();
+</script>
 </body>
 </html>
