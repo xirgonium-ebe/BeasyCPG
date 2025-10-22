@@ -51,7 +51,7 @@
             <label>QName contrainte DynList
               <input name="dynQName" value="fr.becpg.repo.dictionary.constraint.DynListConstraint" />
             </label>
-            <label>Paramètre “path”
+            <label>Nom du paramètre “path”
               <input name="dynPathParam" value="path" />
             </label>
             <label>Locale par défaut
@@ -75,7 +75,7 @@
             <label class="check"><input type="checkbox" name="containerAssociations" checked /> Générer des associations</label>
           </div>
           <div>
-            <label>Sets disponibles (attribut <code>set</code> des &lt;field&gt;)</label>
+            <label>Sets disponibles (pour l’attribut set des &lt;field&gt;)</label>
             <div class="inline">
               <input name="newFieldSet" placeholder="ex: referentialData" />
               <button type="button" id="btnAddFieldSet" class="btn">Ajouter set</button>
@@ -136,7 +136,7 @@
           </div>
 
           <div class="grid-3">
-            <label>Field set (<code>set</code>)
+            <label>Field set (attribut set=…)
               <select name="fieldSet"></select>
             </label>
             <label>Contrôle de field
@@ -178,7 +178,7 @@
           <legend>Contrainte DynList (beCPG)</legend>
           <div class="grid-3">
             <label>Nom de la contrainte
-              <input name="constraintName" placeholder="ex: brn:goDecisionConstraint" />
+              <input name="constraintName" placeholder="ex: brn:goDecisionList" />
             </label>
             <label>Path (cm:... de la liste)
               <input name="dynPath" placeholder="/System/Lists/bcpg:entityLists/ma_liste" />
@@ -192,7 +192,7 @@
           <div class="inline">
             <button type="button" id="btnCreateDynFromProp" class="btn">+ Créer DynList depuis cette propriété</button>
           </div>
-          <p class="small-muted">La contrainte générée utilise DynListConstraint (beCPG) avec constraintType=bcpg:listValue, constraintProp=bcpg:lvValue, addEmptyValue=true. Seuls <strong>name</strong> et <strong>path</strong> sont modifiables.</p>
+          <p class="small-muted">La contrainte générée fixe constraintType=bcpg:listValue, constraintProp=bcpg:lvValue, addEmptyValue=true (seuls name et path sont éditables).</p>
         </fieldset>
 
         <div class="row-actions">
@@ -291,7 +291,6 @@
       <form id="formDyn" class="form-grid">
         <fieldset>
           <legend><span id="dynFormLegend">Nouvelle DynList</span></legend>
-
           <div class="grid-3">
             <label>Nom logique de la liste
               <input name="listName" placeholder="ex: brn_goDecision" required />
@@ -383,7 +382,7 @@ NO_GO:NO GO"></textarea>
             <h3>Share – &lt;field&gt;</h3>
             <button class="btn btn-copy" data-copy="#outField">Copier</button>
           </div>
-          <textarea id="outField" rows="18" readonly></textarea>
+          <textarea id="outField" rows="16" readonly></textarea>
         </div>
       </div>
 
