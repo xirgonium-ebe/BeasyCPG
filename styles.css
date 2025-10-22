@@ -89,9 +89,9 @@ main{ padding:16px 20px; }
 /* plus de .panel.active et pas de règle :has() ici */
 
 /* Si le navigateur supporte :has(), on affiche "Projet" par défaut quand aucun hash */
-@supports(selector(:has(*))){
+/*@supports(selector(:has(*))){
   body:not(:has(.panel:target)) #tab-project{ display:block; }
-}
+}*/
 
 
 /* ---------------- Forms ---------------- */
