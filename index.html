@@ -1,405 +1,184 @@
 <!doctype html>
 <html lang="fr">
-  
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Star Wars – Alfresco Model Generator</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-</head>
+  <title>BeasyCPG – Configurator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="./app.js" defer></script>
+</head>
 <body>
   <header class="app-header">
-    <h1>🛰️ Star Wars – Générateur de modèles Alfresco</h1>
-    <div class="header-actions">
-      <button id="btnExportJSON" class="btn">Exporter (.json)</button>
-      <label class="file-label">Importer
-        <input type="file" id="fileImportJSON" accept=".json" />
-      </label>
-      <button id="btnReset" class="btn btn-danger">Réinitialiser</button>
+    <h1>BeasyCPG – Générateur de configuration</h1>
+    <p class="subtitle">Exemples d’entités : Jedi, Sith, Droïdes, Vaisseaux…</p>
+    <div class="actions">
+      <button id="btnSaveProject" class="btn primary">Enregistrer le projet</button>
+      <button id="btnExportDynlistCsv" class="btn">Exporter DynLists (CSV)</button>
+      <button id="btnExportDynlistJson" class="btn">Exporter DynLists (JSON)</button>
     </div>
+    <div id="saveStatus" class="status" aria-live="polite"></div>
   </header>
 
-  <nav class="tabs">
-  <a href="#tab-project"   class="tab">Projet</a>
-  <a href="#tab-properties" class="tab">Propriétés</a>
-  <a href="#tab-assocs"     class="tab">Associations</a>
-  <a href="#tab-dynlists"   class="tab">DynLists</a>
-  <a href="#tab-preview"    class="tab">Aperçu / Export</a>
-</nav>
-
   <main>
-    <!-- ============ PROJET ============ -->
-    <section id="tab-project" class="panel active">
-      <form id="formProject" class="form-grid">
-        <fieldset>
-          <legend>Infos projet</legend>
-          <label>Nom du projet
-            <input name="projectName" placeholder="ex: DeathStarBlueprints" />
-          </label>
-          <label>Namespace prefix
-            <input name="nsPrefix" placeholder="ex: swr" />
-          </label>
-          <label>Namespace URI
-            <input name="nsUri" placeholder="ex: http://galactic.empire/swr/1.0" />
-          </label>
-        </fieldset>
+    <!-- Tabs -->
+    <div class="tabs" role="tablist" aria-label="Sections de configuration">
+      <button class="tab is-active" role="tab" aria-selected="true" aria-controls="panel-projet" id="tab-projet">Projet</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="panel-model" id="tab-model">Modèle</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="panel-shows" id="tab-shows">Shows</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="panel-fields" id="tab-fields">Fields</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="panel-dynlists" id="tab-dynlists">DynLists</button>
+    </div>
 
-        <fieldset>
-          <legend>Paramètres généraux</legend>
-          <div class="grid-3">
-            <label>QName contrainte DynList
-              <input name="dynQName" value="fr.becpg.repo.dictionary.constraint.DynListConstraint" />
-            </label>
-            <label>Nom du paramètre “path”
-              <input name="dynPathParam" value="path" />
-            </label>
-            <label>Locale par défaut
-              <input name="defaultLocale" value="fr" />
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Conteneurs & Sets</legend>
-          <div class="inline">
-            <label class="check"><input type="checkbox" name="includeContainers" checked /> Inclure les balises conteneurs</label>
-            <label class="check"><input type="checkbox" name="containerProperties" checked /> Inclure &lt;properties&gt;</label>
-            <label class="check"><input type="checkbox" name="containerAssociations" checked /> Inclure &lt;associations&gt;</label>
-          </div>
-          <div>
-            <label>Ajouter un set de formulaire</label>
-            <div class="inline">
-              <input name="newFieldSet" placeholder="ex: imperialConfig" />
-              <button type="button" id="btnAddFieldSet" class="btn">+ Ajouter set</button>
-            </div>
-          </div>
-          <ul id="ulFieldSets" class="small-muted"></ul>
-        </fieldset>
-
-        <div class="row-actions">
-          <button type="button" class="btn btn-primary" id="btnSaveProject">Enregistrer le projet</button>
+    <!-- Panels -->
+    <section id="panel-projet" class="panel is-active" role="tabpanel" aria-labelledby="tab-projet">
+      <h2>Projet</h2>
+      <form id="projectForm" autocomplete="off">
+        <div class="grid">
+          <label>
+            Nom du projet
+            <input name="projectName" type="text" placeholder="[JEDI-001] Sabre laser – config" required />
+          </label>
+          <label>
+            Code projet
+            <input name="projectCode" type="text" placeholder="JEDI-001" required />
+          </label>
+          <label>
+            Auteur
+            <input name="author" type="text" placeholder="Obi-Wan Kenobi" />
+          </label>
+          <label>
+            Commentaire
+            <input name="comment" type="text" placeholder="Config initiale de tests (Star Wars)" />
+          </label>
         </div>
       </form>
     </section>
 
-    <!-- ============ PROPRIÉTÉS ============ -->
-    <section id="tab-properties" class="panel">
-      <form id="formProperty" class="form-grid">
+    <section id="panel-model" class="panel" role="tabpanel" aria-labelledby="tab-model">
+      <h2>Modèle</h2>
 
-        <!-- Modèle -->
-        <fieldset class="sec-model">
-          <legend>Modèle — Propriété</legend>
-          <div class="grid-3">
-            <label>Nom technique
-              <input name="qnameLocal" placeholder="ex: lightsaberColor" required />
-            </label>
-            <label>Title (libellé)
-              <input name="title" placeholder="Couleur du sabre laser" />
-            </label>
-            <label>Type
-              <select name="type">
-                <option>d:text</option><option>d:mltext</option><option>d:int</option>
-                <option>d:boolean</option><option>d:date</option><option>d:datetime</option>
-                <option>d:nodeRef</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="grid-3">
-            <label class="check"><input type="checkbox" name="multiple" /> Multiple</label>
-            <label>Valeur par défaut
-              <input name="default" placeholder="ex: bleu" />
-            </label>
-            <label>DynList liée
-              <select name="linkDynList">
-                <option value="">— aucune —</option>
-              </select>
-            </label>
-          </div>
-
-          <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
-        </fieldset>
-
-        <!-- Show -->
-        <fieldset class="sec-show">
-          <legend>Show — Propriété</legend>
-          <label class="check"><input type="checkbox" name="showForceProp" /> Ajouter <code>force="true"</code></label>
-          <label class="check"><input type="checkbox" name="showForModeProp" /> Ajouter <code>for-mode="true"</code></label>
-        </fieldset>
-
-        <!-- Field -->
-        <fieldset class="sec-field">
-          <legend>Field — Propriété</legend>
-          <div class="grid-3">
-            <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
-            <label class="check"><input type="checkbox" name="readOnlyForm" /> Read-only</label>
-            <label>Field set
-              <select name="fieldSet"></select>
-            </label>
-          </div>
-
-          <div class="grid-3">
-            <label>Label ID
-              <input name="labelId" placeholder="ex: sw.forms.field.lightsaberColor" />
-            </label>
-            <label>Type de contrôle
-              <select name="fieldControl">
-                <option value="auto">Auto</option>
-                <option value="textfield">Texte court</option>
-                <option value="textarea">Texte long</option>
-                <option value="assoc-auto">Association (autocomplete-association)</option>
-                <option value="noderef-auto">Hiérarchie (autocomplete)</option>
-              </select>
-            </label>
-            <label>Max length
-              <input name="maxLength" type="number" placeholder="ex: 40" />
-            </label>
-          </div>
-
-          <!-- Association options -->
-          <div id="propAssocOptions" class="grid-3" style="display:none">
-            <label>Datasource (ds)
-              <input name="assocDs" placeholder="ex: becpg/autocomplete/targetassoc/associations/sw:padawan" />
-            </label>
-            <label>pageLinkTemplate
-              <input name="assocPageLinkTemplate" placeholder="ex: jedi-profile?nodeRef={nodeRef}" />
-            </label>
-          </div>
-
-          <!-- NodeRef options -->
-          <div id="propNodeRefOptions" class="grid-3" style="display:none">
-            <label>Datasource (ds)
-              <input name="nrDs" placeholder="ex: becpg/autocomplete/linkedvalue/values/System/JediOrder/sw:entityLists/jediHierarchy" />
-            </label>
-            <label>Niveaux hiérarchiques
-              <input name="nrLevels" type="number" value="1" min="1" />
-            </label>
-          </div>
-        </fieldset>
-
-        <div class="row-actions">
-          <button type="submit" class="btn btn-primary" id="btnSaveProp">Ajouter propriété</button>
-          <button type="button" class="btn" id="btnCancelProp" style="display:none">Annuler</button>
+      <details open class="group">
+        <summary>Définition du modèle</summary>
+        <div class="grid">
+          <label>
+            ID du modèle
+            <input name="model.id" type="text" placeholder="sw:lightsaber" />
+          </label>
+          <label>
+            Titre du modèle
+            <input name="model.title" type="text" placeholder="Sabre laser" />
+          </label>
+          <label>
+            Namespace
+            <input name="model.namespace" type="text" placeholder="sw" />
+          </label>
+          <label>
+            Description
+            <input name="model.description" type="text" placeholder="Modèle pour objets Star Wars" />
+          </label>
         </div>
-      </form>
+      </details>
 
-      <div class="list">
-        <h3>Propriétés existantes</h3>
-        <table id="tblProperties" class="table">
+      <details class="group">
+        <summary>Associations</summary>
+        <p class="hint">Exemples: porteur (Jedi), cristaux Kyber, pièces détachées…</p>
+        <table class="table" id="tableAssociations">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th>
-              <th>Mand(M)</th><th>Mand(F)</th><th>RO</th><th>DynList</th><th>Set</th><th></th>
+              <th>Nom</th>
+              <th>Type cible</th>
+              <th>Cardinalité</th>
+              <th>Obligatoire</th>
+              <th>Rôle site</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- lignes dynamiques -->
+          </tbody>
+        </table>
+        <button class="btn" data-action="add-assoc">Ajouter une association</button>
+      </details>
+    </section>
+
+    <section id="panel-shows" class="panel" role="tabpanel" aria-labelledby="tab-shows">
+      <h2>Shows</h2>
+      <details open class="group">
+        <summary>Configuration des shows (groupes d’affichage)</summary>
+        <table class="table" id="tableShows">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Titre</th>
+              <th>Description</th>
+              <th>Visible (condition)</th>
+              <th>Ordre</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
-      </div>
+        <button class="btn" data-action="add-show">Ajouter un show</button>
+      </details>
     </section>
 
-    <!-- ============ ASSOCIATIONS ============ -->
-    <section id="tab-assocs" class="panel">
-      <form id="formAssoc" class="form-grid">
-        <fieldset class="sec-model">
-          <legend>Modèle — Association</legend>
-          <div class="grid-3">
-            <label>Nom technique
-              <input name="qnameLocal" placeholder="ex: master" required />
-            </label>
-            <label>Title
-              <input name="title" placeholder="ex: Maître Jedi" />
-            </label>
-            <label>Classe cible
-              <input name="targetClass" value="sw:jediKnight" />
-            </label>
-          </div>
-
-          <div class="grid-3">
-            <label>Source many
-              <select name="sourceMany">
-                <option value="true" selected>true</option><option value="false">false</option>
-              </select>
-            </label>
-            <label>Target many
-              <select name="targetMany">
-                <option value="false" selected>false</option><option value="true">true</option>
-              </select>
-            </label>
-            <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory</label>
-          </div>
-        </fieldset>
-
-        <fieldset class="sec-show">
-          <legend>Show — Association</legend>
-          <p class="small-muted">Un &lt;show&gt; simple sera généré pour l’association.</p>
-        </fieldset>
-
-        <fieldset class="sec-field">
-          <legend>Field — Association</legend>
-          <div class="grid-3">
-            <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory</label>
-            <label>Field set
-              <select name="fieldSet"></select>
-            </label>
-          </div>
-          <div class="grid-3">
-            <label>Datasource (ds)
-              <input name="assocDs" placeholder="ex: becpg/autocomplete/targetassoc/associations/sw:apprentice" />
-            </label>
-            <label>pageLinkTemplate
-              <input name="assocPageLinkTemplate" placeholder="ex: jedi-profile?nodeRef={nodeRef}" />
-            </label>
-          </div>
-        </fieldset>
-
-        <div class="row-actions">
-          <button type="submit" id="btnSaveAssoc" class="btn btn-primary">Ajouter association</button>
-          <button type="button" id="btnCancelAssoc" class="btn" style="display:none">Annuler</button>
-        </div>
-      </form>
-
-      <div class="list">
-        <h3>Associations existantes</h3>
-        <table id="tblAssocs" class="table">
+    <section id="panel-fields" class="panel" role="tabpanel" aria-labelledby="tab-fields">
+      <h2>Fields</h2>
+      <details open class="group">
+        <summary>Champs</summary>
+        <table class="table" id="tableFields">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th>
-              <th>Mand(M)</th><th>Mand(F)</th><th>Set</th><th></th>
+              <th>Propriété</th>
+              <th>Type</th>
+              <th>Obligatoire</th>
+              <th>Lecture seule</th>
+              <th>Contrainte / DynList</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
-      </div>
+        <button class="btn" data-action="add-field">Ajouter un field</button>
+      </details>
     </section>
 
-    <!-- ============ DYNLISTS ============ -->
-    <section id="tab-dynlists" class="panel">
-      <form id="formDyn" class="form-grid">
-        <fieldset>
-          <legend>DynList — Exemples Star Wars</legend>
-          <div class="grid-3">
-            <label>Nom logique
-              <input name="listName" placeholder="ex: swr_lightsaberColors" required />
-            </label>
-            <label>Path (dans /System/Lists/…)
-              <input name="listPath" placeholder="/System/Lists/bcpg:entityLists/swr_lightsaberColors" required />
-            </label>
-          </div>
-
-          <label>Coller vos lignes <small>(format <code>code:value</code>)</small>
-            <textarea name="pasted" rows="6" placeholder="BLUE:Bleu
-GREEN:Vert
-RED:Rouge
-PURPLE:Violet"></textarea>
+    <section id="panel-dynlists" class="panel" role="tabpanel" aria-labelledby="tab-dynlists">
+      <h2>DynLists</h2>
+      <details open class="group">
+        <summary>Tables des contraintes DynList</summary>
+        <p class="hint">Tu peux exporter avec en-têtes personnalisés et inclure chemin + nom de DynList.</p>
+        <div class="export-headers">
+          <label>
+            En-tête CSV (séparé par des virgules)
+            <input id="dynlistHeaders" type="text" placeholder="path,name,code,label,value" />
           </label>
-
-          <div class="row-actions">
-            <button type="button" id="btnParseDyn" class="btn">Analyser</button>
-          </div>
-
-          <fieldset>
-            <legend>Ajout inline</legend>
-            <div class="grid-3">
-              <label>code <input name="il_code" placeholder="ex: YELLOW" /></label>
-              <label>value <input name="il_value" placeholder="ex: Jaune" /></label>
-            </div>
-            <div class="row-actions">
-              <button type="button" id="btnInlineAdd" class="btn">+ Ajouter une ligne</button>
-            </div>
-          </fieldset>
-
-          <div class="row-actions">
-            <button type="submit" class="btn btn-primary" id="btnSaveDyn">Ajouter DynList</button>
-            <button type="button" class="btn" id="btnCancelDyn" style="display:none">Annuler</button>
-          </div>
-        </fieldset>
-      </form>
-
-      <div class="list">
-        <h3>DynLists existantes</h3>
-        <table id="tblDyn" class="table">
-          <thead><tr><th>Nom</th><th>Path</th><th>Entrées</th><th></th></tr></thead>
+          <label>
+            Chemin (prefix)
+            <input id="dynlistPathPrefix" type="text" placeholder="/System/Lists/bcpg:entityLists/" />
+          </label>
+        </div>
+        <table class="table" id="tableDynLists">
+          <thead>
+            <tr>
+              <th>Nom DynList</th>
+              <th>Code</th>
+              <th>Label</th>
+              <th>Valeur</th>
+              <th>Chemin (auto)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
           <tbody></tbody>
         </table>
-      </div>
-    </section>
-
-    <!-- ============ APERÇU ============ -->
-    <section id="tab-preview" class="panel">
-      <div class="preview-grid">
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>&lt;properties&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outProps">Copier</button>
-          </div>
-          <textarea id="outProps" rows="10" readonly></textarea>
-        </div>
-
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>&lt;associations&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outAssocs">Copier</button>
-          </div>
-          <textarea id="outAssocs" rows="10" readonly></textarea>
-        </div>
-
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>&lt;constraints&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outConstraints">Copier</button>
-          </div>
-          <textarea id="outConstraints" rows="8" readonly></textarea>
-        </div>
-
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>&lt;show&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outShow">Copier</button>
-          </div>
-          <textarea id="outShow" rows="8" readonly></textarea>
-        </div>
-
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>&lt;field&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outField">Copier</button>
-          </div>
-          <textarea id="outField" rows="12" readonly></textarea>
-        </div>
-      </div>
-
-      <div class="export-actions">
-        <!-- Avant: <button id="btnDownloadZip" class="btn btn-primary">Télécharger ZIP</button> -->
-<button id="btnExportDynCSVs" class="btn btn-primary">Exporter CSV des DynLists</button>
-      </div>
+        <button class="btn" data-action="add-dynrow">Ajouter une ligne</button>
+      </details>
     </section>
   </main>
 
   <footer class="app-footer">
-    <small>✨ Que la Force soit avec vos modèles ✨</small>
+    <small>© BeasyCPG – Générateur – Star Wars sample data uniquement (pas d’usage Boiron/Adisseo/ben/go)</small>
   </footer>
-
-  <script src="app.js"></script>
-  <script>
-(function(){
-  function ensureDefault(){
-    if (!location.hash || !document.querySelector(location.hash)) {
-      location.replace('#tab-project');
-    }
-  }
-  function setActive(){
-    const hash = location.hash;
-    document.querySelectorAll('.tabs .tab').forEach(a=>a.removeAttribute('aria-current'));
-    const active = Array.from(document.querySelectorAll('.tabs .tab'))
-      .find(a => a.getAttribute('href') === hash);
-    if (active) active.setAttribute('aria-current','page');
-  }
-  ensureDefault();
-  setActive();
-  window.addEventListener('hashchange', setActive);
-})();
-</script>
 </body>
 </html>
