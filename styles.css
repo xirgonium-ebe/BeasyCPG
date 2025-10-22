@@ -93,8 +93,6 @@ main{ padding:16px 20px; }
   body:not(:has(.panel:target)) #tab-project{ display:block; }
 }
 
-/* (Optionnel) Si tu utilises aussi du JS pour .active, tu peux conserver : */
-.panel.active{ display:block; }
 
 /* ---------------- Forms ---------------- */
 .form-grid label{
