@@ -83,14 +83,10 @@ small,.small-muted{ color:var(--muted); }
 
 /* Panneaux */
 main{ padding:16px 20px; }
-.panel{
-  display:none; background:var(--panel); border:1px solid var(--border);
-  border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);
-  position:relative; z-index:1;
-}
-
-/* Affichage via :target (fallback sans JS) */
-.panel:target{ display:block; }
+/* Panneaux (onglets) */
+.panel { display: none; }
+.panel:target { display: block; }
+/* plus de .panel.active et pas de règle :has() ici */
 
 /* Si le navigateur supporte :has(), on affiche "Projet" par défaut quand aucun hash */
 @supports(selector(:has(*))){
