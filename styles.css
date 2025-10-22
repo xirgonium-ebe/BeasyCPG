@@ -1,90 +1,209 @@
-/* ---- Thème Star Wars léger (configurable) ---- */
+/* =======================================================
+   STAR WARS THEME – styles.css (full)
+   - Thème configurable via variables
+   - Onglets hash-based (:target) -> fonctionne même si JS plante
+   - Sections Modèle / Show / Field mises en valeur
+   - Formulaires, tables, preview, boutons, responsive
+   ======================================================= */
+
+/* ---------------- Root variables (faciles à tuner) ---------------- */
 :root{
   --bg: #0b0f14;
   --panel: #101720;
+  --panel-2: #0f1621;
   --text: #e8f1ff;
   --muted: #9ab0c7;
 
   --border: #1f2c3a;
   --accent: #3ea6ff;
 
-  /* sous-sections */
-  --model: #4ea1ff;   /* sabre bleu */
-  --show:  #33d17a;   /* sabre vert */
-  --field: #ff4757;   /* sabre rouge */
+  /* Couleurs sabres (sous-sections) */
+  --model: #4ea1ff;   /* bleu */
+  --show:  #33d17a;   /* vert */
+  --field: #ff4757;   /* rouge */
 
-  --radius: 10px;
+  --radius: 12px;
   --gap: 12px;
   --shadow: 0 10px 24px rgba(0,0,0,.35);
 }
 
-/* base */
-html,body{ background:var(--bg); color:var(--text); font-family: Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; }
+/* ---------------- Base / Layout ---------------- */
+*{ box-sizing:border-box; }
+html, body{
+  margin:0; padding:0; background:var(--bg); color:var(--text);
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  line-height:1.45;
+}
 h1,h2,h3,legend{ color:var(--text); }
+a{ color:var(--accent); text-decoration:none; }
 small,.small-muted{ color:var(--muted); }
 
-.app-header, .app-footer{ background: linear-gradient(180deg, rgba(255,255,255,.02), transparent); border-bottom:1px solid var(--border); }
-.app-header{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 20px; }
+/* Header / Footer */
+.app-header, .app-footer{
+  background: linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  border-bottom: 1px solid var(--border);
+}
+.app-header{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; padding:16px 20px;
+}
 .header-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.app-footer{ padding:16px 20px; border-top:1px solid var(--border); }
 
-.btn{ background:#172230; border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; cursor:pointer; }
+/* ---------------- Buttons ---------------- */
+.btn{
+  background:#172230; border:1px solid var(--border); color:var(--text);
+  padding:8px 12px; border-radius:10px; cursor:pointer;
+  transition: border-color .15s, box-shadow .15s, transform .04s ease;
+}
 .btn:hover{ border-color:var(--accent); box-shadow:0 0 0 2px rgba(62,166,255,.15) inset; }
-.btn-primary{ background: var(--accent); border-color: var(--accent); color:#04121f; }
+.btn:active{ transform: translateY(1px); }
+.btn-primary{ background:var(--accent); border-color:var(--accent); color:#04121f; }
 .btn-danger{ background:#3a0d11; border-color:#5e1b23; color:#ffd8dc; }
-.file-label{ position:relative; border:1px dashed var(--border); padding:8px 12px; border-radius:8px; }
+.btn-copy{ font-size:14px; }
+
+.file-label{
+  position:relative; border:1px dashed var(--border); padding:8px 12px; border-radius:10px;
+}
 .file-label input{ display:none; }
 
-.tabs{ display:flex; gap:8px; padding:8px 12px; border-bottom:1px solid var(--border); backdrop-filter:saturate(120%); }
-.tab{ background:#131b26; color:var(--text); border:1px solid var(--border); border-bottom:none; padding:8px 14px; border-top-left-radius:8px; border-top-right-radius:8px; }
-.tab.active{ background:var(--panel); color:#fff; box-shadow: inset 0 -2px 0 var(--accent); }
+/* ---------------- Tabs (hash-based :target) ---------------- */
+/* Barre d’onglets cliquable même si JS en panne */
+.tabs{
+  display:flex; gap:8px; padding:8px 12px; border-bottom:1px solid var(--border);
+  position: sticky; top: 0; z-index: 1000;
+  background: linear-gradient(180deg, rgba(0,0,0,.35), transparent);
+  backdrop-filter:saturate(120%);
+}
+.tabs .tab{
+  display:inline-block; padding:8px 14px; border:1px solid var(--border); border-bottom:none;
+  border-top-left-radius:10px; border-top-right-radius:10px; background:#131b26; color:var(--text);
+}
+.tabs .tab[aria-current="page"]{ background:var(--panel); color:#fff; box-shadow: inset 0 -2px 0 var(--accent); }
 
+/* Panneaux */
 main{ padding:16px 20px; }
-.panel{ display:none; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); }
+.panel{
+  display:none; background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);
+  position:relative; z-index:1;
+}
+
+/* Affichage via :target (fallback sans JS) */
+.panel:target{ display:block; }
+
+/* Si le navigateur supporte :has(), on affiche "Projet" par défaut quand aucun hash */
+@supports(selector(:has(*))){
+  body:not(:has(.panel:target)) #tab-project{ display:block; }
+}
+
+/* (Optionnel) Si tu utilises aussi du JS pour .active, tu peux conserver : */
 .panel.active{ display:block; }
 
-.form-grid label{ display:flex; flex-direction:column; gap:6px; font-size:14px; }
-.form-grid input, .form-grid select, .form-grid textarea{
-  background:#0e1520; border:1px solid var(--border); color:var(--text);
-  border-radius:8px; padding:8px 10px; outline:none;
+/* ---------------- Forms ---------------- */
+.form-grid label{
+  display:flex; flex-direction:column; gap:6px; font-size:14px;
 }
-.form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus{
-  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(62,166,255,.18);
+.form-grid input,
+.form-grid select,
+.form-grid textarea{
+  background:#0e1520; border:1px solid var(--border); color:var(--text);
+  border-radius:10px; padding:8px 10px; outline:none; font-size:14px;
+}
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus{
+  border-color:var(--accent); box-shadow: 0 0 0 3px rgba(62,166,255,.18);
 }
 .form-grid .check{ display:flex; align-items:center; gap:8px; }
 .form-grid .check input{ width:auto; }
 
 .grid-3{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--gap); }
-.inline{ display:flex; gap:var(--gap); flex-wrap:wrap; align-items:center; }
+.inline{ display:flex; gap: var(--gap); flex-wrap: wrap; align-items: center; }
 .row-actions{ display:flex; gap:10px; margin-top:14px; }
 
-.table{ width:100%; border-collapse: collapse; background:#0f1621; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
-.table thead th{ text-align:left; font-weight:600; padding:10px; background:#0b121b; border-bottom:1px solid var(--border); color:#cde1ff; }
-.table tbody td{ padding:10px; border-top:1px solid var(--border); }
-
-textarea[readonly]{ opacity:.95; }
-
-/* blocs d’aperçu */
-.preview-grid{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:16px; }
-.preview-block{ background:#0f1621; border:1px solid var(--border); border-radius:var(--radius); padding:12px; }
-.block-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-
-/* ---- Sous-sections Model / Show / Field ---- */
-fieldset{ border:1px solid var(--border); border-radius:12px; padding:14px; margin:14px 0; position:relative; }
+/* Fieldsets (sections) */
+fieldset{
+  border:1px solid var(--border); border-radius:14px; padding:14px; margin:14px 0; position:relative;
+}
 legend{ padding:0 10px; font-weight:700; letter-spacing:.3px; }
 
-/* Barre sabre + badge icône */
-fieldset.sec-model{ border-color: color-mix(in oklab, var(--model) 55%, var(--border)); box-shadow: inset 0 0 0 1px rgba(78,161,255,.08), 0 0 0 2px rgba(78,161,255,.04); }
+/* --- Sous-sections sabres --- */
+fieldset.sec-model{
+  border-color: color-mix(in oklab, var(--model) 55%, var(--border));
+  box-shadow: inset 0 0 0 1px rgba(78,161,255,.08), 0 0 0 2px rgba(78,161,255,.05);
+}
 fieldset.sec-model::before{
   content:""; position:absolute; inset:0 0 auto 0; height:3px;
-  background: radial-gradient(closest-side, rgba(78,161,255,.9), transparent 70%), linear-gradient(90deg, #6fb9ff, #4ea1ff, #a7d2ff);
-  border-top-left-radius:12px; border-top-right-radius:12px; filter: drop-shadow(0 0 6px rgba(78,161,255,.5));
+  background: radial-gradient(closest-side, rgba(78,161,255,.9), transparent 70%),
+              linear-gradient(90deg, #6fb9ff, #4ea1ff, #a7d2ff);
+  border-top-left-radius:14px; border-top-right-radius:14px;
+  filter: drop-shadow(0 0 6px rgba(78,161,255,.5));
 }
-fieldset.sec-model legend::after{
-  content:"⚔️"; margin-left:6px; filter: drop-shadow(0 0 6px rgba(78,161,255,.7));
-}
+fieldset.sec-model legend::after{ content:"⚔️"; margin-left:6px; filter: drop-shadow(0 0 6px rgba(78,161,255,.7)); }
 
-fieldset.sec-show{ border-color: color-mix(in oklab, var(--show) 55%, var(--border)); box-shadow: inset 0 0 0 1px rgba(51,209,122,.10), 0 0 0 2px rgba(51,209,122,.05); }
+fieldset.sec-show{
+  border-color: color-mix(in oklab, var(--show) 55%, var(--border));
+  box-shadow: inset 0 0 0 1px rgba(51,209,122,.10), 0 0 0 2px rgba(51,209,122,.05);
+}
 fieldset.sec-show::before{
   content:""; position:absolute; inset:0 0 auto 0; height:3px;
-  background: radial-gradient(closest-side, rgba(51,209,122,.9), transparent 70%), linear-gradient(90deg, #6ee7a0, #33d17a, #9cf2c8);
-  border-top-left-radius:12px; border-top-right-radius:
+  background: radial-gradient(closest-side, rgba(51,209,122,.9), transparent 70%),
+              linear-gradient(90deg, #6ee7a0, #33d17a, #9cf2c8);
+  border-top-left-radius:14px; border-top-right-radius:14px;
+  filter: drop-shadow(0 0 6px rgba(51,209,122,.5));
+}
+fieldset.sec-show legend::after{ content:"✨"; margin-left:6px; filter: drop-shadow(0 0 6px rgba(51,209,122,.7)); }
+
+fieldset.sec-field{
+  border-color: color-mix(in oklab, var(--field) 55%, var(--border));
+  box-shadow: inset 0 0 0 1px rgba(255,71,87,.10), 0 0 0 2px rgba(255,71,87,.05);
+}
+fieldset.sec-field::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:3px;
+  background: radial-gradient(closest-side, rgba(255,71,87,.9), transparent 70%),
+              linear-gradient(90deg, #ff8a99, #ff4757, #ffc5cb);
+  border-top-left-radius:14px; border-top-right-radius:14px;
+  filter: drop-shadow(0 0 6px rgba(255,71,87,.45));
+}
+fieldset.sec-field legend::after{ content:"🛠️"; margin-left:6px; filter: drop-shadow(0 0 6px rgba(255,71,87,.7)); }
+
+/* ---------------- Tables ---------------- */
+.table{
+  width:100%; border-collapse: collapse; background:var(--panel-2);
+  border:1px solid var(--border); border-radius:12px; overflow:hidden;
+}
+.table thead th{
+  text-align:left; font-weight:600; padding:10px; background:#0b121b;
+  border-bottom:1px solid var(--border); color:#cde1ff;
+}
+.table tbody td{ padding:10px; border-top:1px solid var(--border); }
+.table tbody tr:hover{ background:#0c1725; }
+
+/* ---------------- Preview blocks ---------------- */
+.preview-grid{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:16px; }
+.preview-block{
+  background:var(--panel-2); border:1px solid var(--border);
+  border-radius:var(--radius); padding:12px;
+}
+.block-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+textarea[readonly]{ opacity:.95; width:100%; min-height:120px; }
+
+/* ---------------- Export actions ---------------- */
+.export-actions{ display:flex; gap:12px; margin-top:16px; }
+
+/* ---------------- Utility ---------------- */
+code, .form-grid code{
+  background:#0a1220; padding:2px 6px; border:1px solid var(--border);
+  border-radius:6px; color:#cde1ff;
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 1100px){
+  .preview-grid{ grid-template-columns: 1fr; }
+}
+@media (max-width: 980px){
+  .grid-3{ grid-template-columns: 1fr; }
+  .tabs{ flex-wrap:wrap; }
+  .app-header{ flex-direction:column; align-items:flex-start; }
+}
