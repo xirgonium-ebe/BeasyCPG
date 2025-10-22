@@ -1,15 +1,28 @@
 /* =====================================================
-   STAR WARS ALFRESCO GENERATOR (v5.2)
-   - Tabs robustes (délégation)
-   - DynLists Analyse/Ajout/Édition OK
-   - Show par propriété (force/for-mode)
-   - Contrainte DynList centrale (ref depuis properties)
-   - Export JSON/ZIP + Copier fragments
+   STAR WARS ALFRESCO GENERATOR (v5.3)
+   - Fix: "Enregistrer le projet" ne casse plus les onglets
+   - Remplace export ZIP par export CSV DynLists (1 fichier / liste)
+   - En-tête CSV configurable dans le code
+   - Show par propriété (force/for-mode), contraintes DynList centrales
    ===================================================== */
 
-const STORAGE_KEY = "alfresco_generator_project_starwars_v52";
+const STORAGE_KEY = "alfresco_generator_project_starwars_v53";
 
-/* ================= Helpers ================= */
+/* ====== Config export DynList ====== */
+/** Inclure une en-tête par fichier CSV ? */
+const DYNLIST_CSV_INCLUDE_HEADER = true;
+/** Générateur d’en-tête (tu peux modifier le format librement) */
+const DYNLIST_CSV_HEADER_FN = (list) => {
+  // list: { listName, listPath, entries:[{code,value}] }
+  // Exemple: lignes de meta en commentaires + ligne de colonnes (facultative)
+  return [
+    `# DynList: ${list.listName}`,
+    `# Path: ${list.listPath}`,
+    `# Rows: ${list.entries.length}`,
+    `# Format: code:value`,
+  ].join("\n");
+};
+
 const $  = (s, r=document)=> r.querySelector(s);
 const $$ = (s, r=document)=> Array.from(r.querySelectorAll(s));
 const ns = ()=> state.project.namespacePrefix || "ns";
@@ -61,31 +74,10 @@ const state = {
       fieldSets: ["referentialData"]
     }
   },
-  // properties: see binder below
   properties: [],
-  // associations: see binder below
   associations: [],
-  // dynlists: [{ listName, listPath, entries:[{code,value}] }]
   dynlists: []
 };
-
-/* ============ Tabs robustes (délégation) ============ */
-document.addEventListener("click", (ev)=>{
-  const btn = ev.target.closest(".tabs .tab");
-  if (!btn) return;
-  ev.preventDefault();
-  const tab = btn.dataset.tab;
-  const panel = document.querySelector(`#tab-${tab}`);
-  if (!panel) { console.warn("[tabs] panneau manquant:", `#tab-${tab}`); return; }
-  document.querySelectorAll(".tabs .tab").forEach(x=>x.classList.remove("active"));
-  btn.classList.add("active");
-  document.querySelectorAll("main .panel").forEach(p=>p.classList.remove("active"));
-  panel.classList.add("active");
-  try {
-    Project.renderFieldSets();
-    Properties.feedDynSelect();
-  } catch(e){ /* no-op */ }
-}, true);
 
 /* ================= Project ================= */
 const Project = (()=>{
@@ -130,21 +122,9 @@ const Project = (()=>{
   }
 
   function bind(){
-    $("#btnAddFieldSet")?.addEventListener("click", ()=>{
-      const input = $("#formProject input[name='newFieldSet']");
-      if(!input) return;
-      const v = (input.value||"").trim();
-      if(!v){ toast("Nom de set requis."); return; }
-      const arr = state.project.settings.fieldSets;
-      const exists = arr.some(s=> s.toLowerCase()===v.toLowerCase());
-      if(!exists){ arr.push(v); saveState(); }
-      renderFieldSets();
-      input.value = "";
-    });
-
-    $("#formProject")?.addEventListener("submit", (e)=>{
-      e.preventDefault();
-      const f = e.currentTarget;
+    // IMPORTANT: on n’utilise plus submit; on clique sur un bouton type="button"
+    $("#btnSaveProject")?.addEventListener("click", ()=>{
+      const f = $("#formProject"); if (!f) return;
       state.project.name = f.projectName.value.trim();
       state.project.namespacePrefix = f.nsPrefix.value.trim();
       state.project.namespaceUri = f.nsUri.value.trim();
@@ -156,6 +136,20 @@ const Project = (()=>{
       state.project.settings.containerAssociations = f.containerAssociations.checked;
       saveState();
       toast("Projet enregistré.");
+      // aucun changement de hash → l’onglet actif reste visible
+      Preview.buildAll();
+    });
+
+    $("#btnAddFieldSet")?.addEventListener("click", ()=>{
+      const input = $("#formProject input[name='newFieldSet']");
+      if(!input) return;
+      const v = (input.value||"").trim();
+      if(!v){ toast("Nom de set requis."); return; }
+      const arr = state.project.settings.fieldSets;
+      const exists = arr.some(s=> s.toLowerCase()===v.toLowerCase());
+      if(!exists){ arr.push(v); saveState(); }
+      renderFieldSets();
+      input.value = "";
     });
   }
 
@@ -290,7 +284,6 @@ const Properties = (()=>{
         showForceProp: f.showForceProp.checked,
         showForModeProp: f.showForModeProp.checked
       };
-
       if (!prop.qnameLocal){ toast("Nom technique requis."); return; }
 
       if (editingIndex===null){
@@ -663,7 +656,7 @@ const Preview = (()=>{
   return { buildAll };
 })();
 
-/* ================= IO (export/import/zip/copy) ================= */
+/* ================= IO (export/import/CSV) ================= */
 const IO = (()=>{
   function bind(){
     // Copier
@@ -704,64 +697,39 @@ const IO = (()=>{
       e.target.value = "";
     });
 
+    // Export CSV DynLists (un fichier par liste)
+    $("#btnExportDynCSVs")?.addEventListener("click", ()=>{
+      if (!state.dynlists.length){ toast("Aucune DynList à exporter."); return; }
+      state.dynlists.forEach(list=>{
+        const lines = [];
+        if (DYNLIST_CSV_INCLUDE_HEADER){
+          lines.push(DYNLIST_CSV_HEADER_FN(list));
+        }
+        // Données au format demandé: "code:value"
+        list.entries.forEach(e=>{
+          const code  = (e.code??"").toString().trim();
+          const value = (e.value??"").toString().trim();
+          lines.push(`${code}:${value}`);
+        });
+        const blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `${list.listName}.csv`; // tu peux mettre .txt si tu préfères
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+    });
+
     // Reset
     $("#btnReset")?.addEventListener("click", ()=>{
       if (!confirm("Réinitialiser le projet (localStorage) ?")) return;
       localStorage.removeItem(STORAGE_KEY); location.reload();
     });
-
-    // ZIP
-    $("#btnDownloadZip")?.addEventListener("click", async ()=>{
-      Preview.buildAll();
-      const zip = new JSZip();
-      const files = [];
-      files.push({path:"model/fragment-model-properties.xml",    content: $("#outProps")?.value || ""});
-      files.push({path:"model/fragment-model-associations.xml", content: $("#outAssocs")?.value || ""});
-      const constraints = $("#outConstraints")?.value || "";
-      if (constraints.trim().length)
-        files.push({path:"model/fragment-model-constraints.xml", content: constraints});
-      files.push({path:"share/fragment-share-show.xml",  content: $("#outShow")?.value || ""});
-      files.push({path:"share/fragment-share-field.xml", content: $("#outField")?.value || ""});
-
-      // DynList export: "code:value" (une par ligne)
-      state.dynlists.forEach(d=>{
-        const lines = d.entries.map(e=> `${e.code??""}:${e.value??""}`);
-        files.push({path:`constraints/${d.listName}.csv`, content: lines.join("\n")});
-      });
-
-      const readme = `# Fragments générés
-Projet: ${state.project.name || "-"}
-Namespace: ${ns()} (${state.project.namespaceUri || "-"})
-
-## Contenu
-- model/fragment-model-properties.xml
-- model/fragment-model-associations.xml
-- model/fragment-model-constraints.xml (si présent)
-- share/fragment-share-show.xml
-- share/fragment-share-field.xml
-- constraints/*.csv (format: code:value)
-
-> DynListConstraint: ${state.project.settings.dynListConstraintQName}
-> Paramètre path: ${state.project.settings.dynListPathParamName}
-> constraintType: ${state.project.settings.dynListConstraintTypeQName}
-> constraintProp: ${state.project.settings.dynListConstraintPropQName}
-> addEmptyValue: ${state.project.settings.dynListAddEmptyValue}
-`;
-      files.push({path:"README.md", content: readme});
-      files.push({path:"project.json", content: JSON.stringify(state, null, 2)});
-
-      files.forEach(f=> zip.file(f.path, f.content));
-      const blob = await zip.generateAsync({type:"blob"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `${(state.project.name || "alfresco-fragments").replace(/[^\w\-]+/g,"_")}.zip`;
-      a.click(); URL.revokeObjectURL(a.href);
-    });
   }
   return { bind };
 })();
 
-/* ================= INIT (DOMContentLoaded + garde-fous) ================= */
+/* ================= INIT ================= */
 document.addEventListener("DOMContentLoaded", ()=>{
   try{
     loadState();
@@ -780,6 +748,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     Dyn.resetForm();
     Dyn.render();
 
+    IO.bind();
     Preview.buildAll();
 
     // Valeur par défaut au cas où
