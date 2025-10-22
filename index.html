@@ -5,43 +5,44 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Star Wars – Alfresco Model Generator</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 
 <body>
   <header class="app-header">
     <h1>🛰️ Star Wars – Générateur de modèles Alfresco</h1>
     <div class="header-actions">
-      <button id="btnExportJSON" class="btn">Exporter (.json)</button>
+      <button id="btnExportJSON" class="btn" aria-label="Exporter le projet en JSON">Exporter (.json)</button>
       <label class="file-label">Importer
-        <input type="file" id="fileImportJSON" accept=".json" />
+        <input type="file" id="fileImportJSON" accept=".json" aria-label="Importer un fichier JSON" />
       </label>
-      <button id="btnReset" class="btn btn-danger">Réinitialiser</button>
+      <button id="btnReset" class="btn btn-danger" aria-label="Réinitialiser le projet">Réinitialiser</button>
     </div>
   </header>
 
-  <nav class="tabs">
-  <a href="#tab-project"   class="tab">Projet</a>
-  <a href="#tab-properties" class="tab">Propriétés</a>
-  <a href="#tab-assocs"     class="tab">Associations</a>
-  <a href="#tab-dynlists"   class="tab">DynLists</a>
-  <a href="#tab-preview"    class="tab">Aperçu / Export</a>
-</nav>
+  <div id="notification" class="notification" role="alert" aria-live="polite"></div>
+
+  <nav class="tabs" role="tablist">
+    <a href="#tab-project" class="tab" role="tab" aria-selected="true">Projet</a>
+    <a href="#tab-properties" class="tab" role="tab">Propriétés</a>
+    <a href="#tab-assocs" class="tab" role="tab">Associations</a>
+    <a href="#tab-dynlists" class="tab" role="tab">DynLists</a>
+    <a href="#tab-preview" class="tab" role="tab">Aperçu / Export</a>
+  </nav>
 
   <main>
     <!-- ============ PROJET ============ -->
-    <section id="tab-project" class="panel active">
+    <section id="tab-project" class="panel" role="tabpanel">
       <form id="formProject" class="form-grid">
         <fieldset>
           <legend>Infos projet</legend>
           <label>Nom du projet
-            <input name="projectName" placeholder="ex: DeathStarBlueprints" />
+            <input name="projectName" placeholder="ex: DeathStarBlueprints" required />
           </label>
           <label>Namespace prefix
-            <input name="nsPrefix" placeholder="ex: swr" />
+            <input name="nsPrefix" placeholder="ex: swr" pattern="[a-zA-Z][a-zA-Z0-9_]*" required />
           </label>
           <label>Namespace URI
-            <input name="nsUri" placeholder="ex: http://galactic.empire/swr/1.0" />
+            <input name="nsUri" placeholder="ex: http://galactic.empire/swr/1.0" type="url" required />
           </label>
         </fieldset>
 
@@ -49,13 +50,13 @@
           <legend>Paramètres généraux</legend>
           <div class="grid-3">
             <label>QName contrainte DynList
-              <input name="dynQName" value="fr.becpg.repo.dictionary.constraint.DynListConstraint" />
+              <input name="dynQName" value="fr.becpg.repo.dictionary.constraint.DynListConstraint" required />
             </label>
             <label>Nom du paramètre “path”
-              <input name="dynPathParam" value="path" />
+              <input name="dynPathParam" value="path" required />
             </label>
             <label>Locale par défaut
-              <input name="defaultLocale" value="fr" />
+              <input name="defaultLocale" value="fr" pattern="[a-z]{2}" required />
             </label>
           </div>
         </fieldset>
@@ -70,29 +71,27 @@
           <div>
             <label>Ajouter un set de formulaire</label>
             <div class="inline">
-              <input name="newFieldSet" placeholder="ex: imperialConfig" />
-              <button type="button" id="btnAddFieldSet" class="btn">+ Ajouter set</button>
+              <input name="newFieldSet" placeholder="ex: imperialConfig" required />
+              <button type="button" id="btnAddFieldSet" class="btn" aria-label="Ajouter un set de formulaire">+ Ajouter set</button>
             </div>
           </div>
           <ul id="ulFieldSets" class="small-muted"></ul>
         </fieldset>
 
         <div class="row-actions">
-          <button type="button" class="btn btn-primary" id="btnSaveProject">Enregistrer le projet</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveProject" aria-label="Enregistrer le projet">Enregistrer le projet</button>
         </div>
       </form>
     </section>
 
     <!-- ============ PROPRIÉTÉS ============ -->
-    <section id="tab-properties" class="panel">
+    <section id="tab-properties" class="panel" role="tabpanel">
       <form id="formProperty" class="form-grid">
-
-        <!-- Modèle -->
         <fieldset class="sec-model">
           <legend>Modèle — Propriété</legend>
           <div class="grid-3">
             <label>Nom technique
-              <input name="qnameLocal" placeholder="ex: lightsaberColor" required />
+              <input name="qnameLocal" placeholder="ex: lightsaberColor" pattern="[a-zA-Z][a-zA-Z0-9_]*" required />
             </label>
             <label>Title (libellé)
               <input name="title" placeholder="Couleur du sabre laser" />
@@ -121,14 +120,12 @@
           <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
         </fieldset>
 
-        <!-- Show -->
         <fieldset class="sec-show">
           <legend>Show — Propriété</legend>
           <label class="check"><input type="checkbox" name="showForceProp" /> Ajouter <code>force="true"</code></label>
           <label class="check"><input type="checkbox" name="showForModeProp" /> Ajouter <code>for-mode="true"</code></label>
         </fieldset>
 
-        <!-- Field -->
         <fieldset class="sec-field">
           <legend>Field — Propriété</legend>
           <div class="grid-3">
@@ -153,11 +150,10 @@
               </select>
             </label>
             <label>Max length
-              <input name="maxLength" type="number" placeholder="ex: 40" />
+              <input name="maxLength" type="number" placeholder="ex: 40" min="1" />
             </label>
           </div>
 
-          <!-- Association options -->
           <div id="propAssocOptions" class="grid-3" style="display:none">
             <label>Datasource (ds)
               <input name="assocDs" placeholder="ex: becpg/autocomplete/targetassoc/associations/sw:padawan" />
@@ -167,20 +163,19 @@
             </label>
           </div>
 
-          <!-- NodeRef options -->
           <div id="propNodeRefOptions" class="grid-3" style="display:none">
             <label>Datasource (ds)
               <input name="nrDs" placeholder="ex: becpg/autocomplete/linkedvalue/values/System/JediOrder/sw:entityLists/jediHierarchy" />
             </label>
             <label>Niveaux hiérarchiques
-              <input name="nrLevels" type="number" value="1" min="1" />
+              <input name="nrLevels" type="number" value="1" min="1" required />
             </label>
           </div>
         </fieldset>
 
         <div class="row-actions">
-          <button type="submit" class="btn btn-primary" id="btnSaveProp">Ajouter propriété</button>
-          <button type="button" class="btn" id="btnCancelProp" style="display:none">Annuler</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveProp" aria-label="Ajouter ou mettre à jour la propriété">Ajouter propriété</button>
+          <button type="button" class="btn" id="btnCancelProp" style="display:none" aria-label="Annuler l'édition">Annuler</button>
         </div>
       </form>
 
@@ -189,8 +184,8 @@
         <table id="tblProperties" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th>
-              <th>Mand(M)</th><th>Mand(F)</th><th>RO</th><th>DynList</th><th>Set</th><th></th>
+              <th scope="col">QName</th><th scope="col">Title</th><th scope="col">Type</th><th scope="col">Multi</th>
+              <th scope="col">Mand(M)</th><th scope="col">Mand(F)</th><th scope="col">RO</th><th scope="col">DynList</th><th scope="col">Set</th><th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -199,19 +194,19 @@
     </section>
 
     <!-- ============ ASSOCIATIONS ============ -->
-    <section id="tab-assocs" class="panel">
+    <section id="tab-assocs" class="panel" role="tabpanel">
       <form id="formAssoc" class="form-grid">
         <fieldset class="sec-model">
           <legend>Modèle — Association</legend>
           <div class="grid-3">
             <label>Nom technique
-              <input name="qnameLocal" placeholder="ex: master" required />
+              <input name="qnameLocal" placeholder="ex: master" pattern="[a-zA-Z][a-zA-Z0-9_]*" required />
             </label>
             <label>Title
               <input name="title" placeholder="ex: Maître Jedi" />
             </label>
             <label>Classe cible
-              <input name="targetClass" value="sw:jediKnight" />
+              <input name="targetClass" value="sw:jediKnight" required />
             </label>
           </div>
 
@@ -254,8 +249,8 @@
         </fieldset>
 
         <div class="row-actions">
-          <button type="submit" id="btnSaveAssoc" class="btn btn-primary">Ajouter association</button>
-          <button type="button" id="btnCancelAssoc" class="btn" style="display:none">Annuler</button>
+          <button type="submit" id="btnSaveAssoc" class="btn btn-primary" aria-label="Ajouter ou mettre à jour l'association">Ajouter association</button>
+          <button type="button" id="btnCancelAssoc" class="btn" style="display:none" aria-label="Annuler l'édition">Annuler</button>
         </div>
       </form>
 
@@ -264,8 +259,8 @@
         <table id="tblAssocs" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th>
-              <th>Mand(M)</th><th>Mand(F)</th><th>Set</th><th></th>
+              <th scope="col">QName</th><th scope="col">Title</th><th scope="col">Target</th><th scope="col">S-many</th><th scope="col">T-many</th>
+              <th scope="col">Mand(M)</th><th scope="col">Mand(F)</th><th scope="col">Set</th><th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -274,13 +269,13 @@
     </section>
 
     <!-- ============ DYNLISTS ============ -->
-    <section id="tab-dynlists" class="panel">
+    <section id="tab-dynlists" class="panel" role="tabpanel">
       <form id="formDyn" class="form-grid">
         <fieldset>
           <legend>DynList — Exemples Star Wars</legend>
           <div class="grid-3">
             <label>Nom logique
-              <input name="listName" placeholder="ex: swr_lightsaberColors" required />
+              <input name="listName" placeholder="ex: swr_lightsaberColors" pattern="[a-zA-Z][a-zA-Z0-9_]*" required />
             </label>
             <label>Path (dans /System/Lists/…)
               <input name="listPath" placeholder="/System/Lists/bcpg:entityLists/swr_lightsaberColors" required />
@@ -288,14 +283,11 @@
           </div>
 
           <label>Coller vos lignes <small>(format <code>code:value</code>)</small>
-            <textarea name="pasted" rows="6" placeholder="BLUE:Bleu
-GREEN:Vert
-RED:Rouge
-PURPLE:Violet"></textarea>
+            <textarea name="pasted" rows="6" placeholder="BLUE:Bleu\nGREEN:Vert\nRED:Rouge\nPURPLE:Violet"></textarea>
           </label>
 
           <div class="row-actions">
-            <button type="button" id="btnParseDyn" class="btn">Analyser</button>
+            <button type="button" id="btnParseDyn" class="btn" aria-label="Analyser les lignes collées">Analyser</button>
           </div>
 
           <fieldset>
@@ -305,13 +297,13 @@ PURPLE:Violet"></textarea>
               <label>value <input name="il_value" placeholder="ex: Jaune" /></label>
             </div>
             <div class="row-actions">
-              <button type="button" id="btnInlineAdd" class="btn">+ Ajouter une ligne</button>
+              <button type="button" id="btnInlineAdd" class="btn" aria-label="Ajouter une ligne inline">+ Ajouter une ligne</button>
             </div>
           </fieldset>
 
           <div class="row-actions">
-            <button type="submit" class="btn btn-primary" id="btnSaveDyn">Ajouter DynList</button>
-            <button type="button" class="btn" id="btnCancelDyn" style="display:none">Annuler</button>
+            <button type="submit" class="btn btn-primary" id="btnSaveDyn" aria-label="Ajouter ou mettre à jour la DynList">Ajouter DynList</button>
+            <button type="button" class="btn" id="btnCancelDyn" style="display:none" aria-label="Annuler l'édition">Annuler</button>
           </div>
         </fieldset>
       </form>
@@ -319,19 +311,19 @@ PURPLE:Violet"></textarea>
       <div class="list">
         <h3>DynLists existantes</h3>
         <table id="tblDyn" class="table">
-          <thead><tr><th>Nom</th><th>Path</th><th>Entrées</th><th></th></tr></thead>
+          <thead><tr><th scope="col">Nom</th><th scope="col">Path</th><th scope="col">Entrées</th><th scope="col">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </section>
 
     <!-- ============ APERÇU ============ -->
-    <section id="tab-preview" class="panel">
+    <section id="tab-preview" class="panel" role="tabpanel">
       <div class="preview-grid">
         <div class="preview-block">
           <div class="block-head">
             <h3>&lt;properties&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outProps">Copier</button>
+            <button class="btn btn-copy" data-copy="#outProps" aria-label="Copier le code XML des propriétés">Copier</button>
           </div>
           <textarea id="outProps" rows="10" readonly></textarea>
         </div>
@@ -339,7 +331,7 @@ PURPLE:Violet"></textarea>
         <div class="preview-block">
           <div class="block-head">
             <h3>&lt;associations&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outAssocs">Copier</button>
+            <button class="btn btn-copy" data-copy="#outAssocs" aria-label="Copier le code XML des associations">Copier</button>
           </div>
           <textarea id="outAssocs" rows="10" readonly></textarea>
         </div>
@@ -347,7 +339,7 @@ PURPLE:Violet"></textarea>
         <div class="preview-block">
           <div class="block-head">
             <h3>&lt;constraints&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outConstraints">Copier</button>
+            <button class="btn btn-copy" data-copy="#outConstraints" aria-label="Copier le code XML des contraintes">Copier</button>
           </div>
           <textarea id="outConstraints" rows="8" readonly></textarea>
         </div>
@@ -355,7 +347,7 @@ PURPLE:Violet"></textarea>
         <div class="preview-block">
           <div class="block-head">
             <h3>&lt;show&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outShow">Copier</button>
+            <button class="btn btn-copy" data-copy="#outShow" aria-label="Copier le code XML de show">Copier</button>
           </div>
           <textarea id="outShow" rows="8" readonly></textarea>
         </div>
@@ -363,15 +355,14 @@ PURPLE:Violet"></textarea>
         <div class="preview-block">
           <div class="block-head">
             <h3>&lt;field&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outField">Copier</button>
+            <button class="btn btn-copy" data-copy="#outField" aria-label="Copier le code XML des champs">Copier</button>
           </div>
           <textarea id="outField" rows="12" readonly></textarea>
         </div>
       </div>
 
       <div class="export-actions">
-        <!-- Avant: <button id="btnDownloadZip" class="btn btn-primary">Télécharger ZIP</button> -->
-<button id="btnExportDynCSVs" class="btn btn-primary">Exporter CSV des DynLists</button>
+        <button id="btnExportDynCSVs" class="btn btn-primary" aria-label="Exporter les DynLists en CSV">Exporter CSV des DynLists</button>
       </div>
     </section>
   </main>
@@ -381,24 +372,5 @@ PURPLE:Violet"></textarea>
   </footer>
 
   <script src="app.js"></script>
-  <script>
-(function(){
-  function ensureDefault(){
-    if (!location.hash || !document.querySelector(location.hash)) {
-      location.replace('#tab-project');
-    }
-  }
-  function setActive(){
-    const hash = location.hash;
-    document.querySelectorAll('.tabs .tab').forEach(a=>a.removeAttribute('aria-current'));
-    const active = Array.from(document.querySelectorAll('.tabs .tab'))
-      .find(a => a.getAttribute('href') === hash);
-    if (active) active.setAttribute('aria-current','page');
-  }
-  ensureDefault();
-  setActive();
-  window.addEventListener('hashchange', setActive);
-})();
-</script>
 </body>
 </html>
