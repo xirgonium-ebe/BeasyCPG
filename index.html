@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Alfresco Generator – Model / Forms / DynLists</title>
   <link rel="stylesheet" href="styles.css" />
-  <!-- JSZip pour export ZIP (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
@@ -93,7 +92,7 @@
     <section id="tab-properties" class="panel">
       <form id="formProperty" class="form-grid">
         <fieldset>
-          <legend>Nouvelle propriété</legend>
+          <legend><span id="propFormLegend">Nouvelle propriété</span></legend>
           <div class="grid-3">
             <label>
               Nom technique (local)
@@ -154,7 +153,8 @@
         </fieldset>
 
         <div class="row-actions">
-          <button type="submit" class="btn btn-primary">Ajouter propriété</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveProp">Ajouter propriété</button>
+          <button type="button" class="btn" id="btnCancelProp" style="display:none">Annuler</button>
         </div>
       </form>
 
@@ -175,7 +175,7 @@
     <section id="tab-assocs" class="panel">
       <form id="formAssoc" class="form-grid">
         <fieldset>
-          <legend>Nouvelle association</legend>
+          <legend><span id="assocFormLegend">Nouvelle association</span></legend>
           <div class="grid-3">
             <label>
               Nom technique (local)
@@ -198,13 +198,13 @@
           <div class="grid-3">
             <label>Source many
               <select name="sourceMany">
+                <option value="true" selected>true</option>
                 <option value="false">false</option>
-                <option value="true">true</option>
               </select>
             </label>
             <label>Target many
               <select name="targetMany">
-                <option value="false">false</option>
+                <option value="false" selected>false</option>
                 <option value="true">true</option>
               </select>
             </label>
@@ -212,7 +212,8 @@
           </div>
         </fieldset>
         <div class="row-actions">
-          <button type="submit" class="btn btn-primary">Ajouter association</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveAssoc">Ajouter association</button>
+          <button type="button" class="btn" id="btnCancelAssoc" style="display:none">Annuler</button>
         </div>
       </form>
 
@@ -233,7 +234,7 @@
     <section id="tab-dynlists" class="panel">
       <form id="formDyn" class="form-grid">
         <fieldset>
-          <legend>Nouvelle DynList</legend>
+          <legend><span id="dynFormLegend">Nouvelle DynList</span></legend>
           <div class="grid-3">
             <label>Nom logique de la liste
               <input name="listName" placeholder="ex: brn_goDecision" required />
@@ -251,7 +252,8 @@ NO_GO;NO GO;fr;true;2"></textarea>
           </label>
           <div class="row-actions">
             <button type="button" id="btnParseDyn" class="btn">Analyser</button>
-            <button type="submit" class="btn btn-primary">Ajouter DynList</button>
+            <button type="submit" class="btn btn-primary" id="btnSaveDyn">Ajouter DynList</button>
+            <button type="button" class="btn" id="btnCancelDyn" style="display:none">Annuler</button>
           </div>
         </fieldset>
       </form>
