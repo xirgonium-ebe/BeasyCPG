@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Alfresco Generator – Model / Forms / DynLists</title>
+  <title>Star Wars – Alfresco Model Generator</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
+
 <body>
   <header class="app-header">
-    <h1>Alfresco/beCPG – Générateur de balises & imports</h1>
+    <h1>🛰️ Star Wars – Générateur de modèles Alfresco</h1>
     <div class="header-actions">
-      <button id="btnExportJSON" class="btn">Exporter projet (.json)</button>
-      <label class="file-label">
-        Importer projet (.json)
+      <button id="btnExportJSON" class="btn">Exporter (.json)</button>
+      <label class="file-label">Importer
         <input type="file" id="fileImportJSON" accept=".json" />
       </label>
       <button id="btnReset" class="btn btn-danger">Réinitialiser</button>
@@ -25,17 +25,17 @@
     <button data-tab="properties" class="tab">Propriétés</button>
     <button data-tab="assocs" class="tab">Associations</button>
     <button data-tab="dynlists" class="tab">DynLists</button>
-    <button data-tab="preview" class="tab">Aperçu & Export</button>
+    <button data-tab="preview" class="tab">Aperçu / Export</button>
   </nav>
 
   <main>
-    <!-- PROJECT -->
+    <!-- ============ PROJET ============ -->
     <section id="tab-project" class="panel active">
       <form id="formProject" class="form-grid">
         <fieldset>
           <legend>Infos projet</legend>
           <label>Nom du projet
-            <input name="projectName" placeholder="ex: Star Wars – Death Star Config" />
+            <input name="projectName" placeholder="ex: DeathStarBlueprints" />
           </label>
           <label>Namespace prefix
             <input name="nsPrefix" placeholder="ex: swr" />
@@ -63,51 +63,44 @@
         <fieldset>
           <legend>Conteneurs & Sets</legend>
           <div class="inline">
-            <label class="check"><input type="checkbox" name="includeContainers" checked /> Inclure &lt;properties&gt; / &lt;associations&gt; / &lt;constraints&gt;</label>
-            <label class="check"><input type="checkbox" name="containerProperties" checked /> Générer des propriétés</label>
-            <label class="check"><input type="checkbox" name="containerAssociations" checked /> Générer des associations</label>
+            <label class="check"><input type="checkbox" name="includeContainers" checked /> Inclure les balises conteneurs</label>
+            <label class="check"><input type="checkbox" name="containerProperties" checked /> Inclure &lt;properties&gt;</label>
+            <label class="check"><input type="checkbox" name="containerAssociations" checked /> Inclure &lt;associations&gt;</label>
           </div>
           <div>
-            <label>Sets disponibles (pour l’attribut set des &lt;field&gt;)</label>
+            <label>Ajouter un set de formulaire</label>
             <div class="inline">
               <input name="newFieldSet" placeholder="ex: imperialConfig" />
-              <button type="button" id="btnAddFieldSet" class="btn">Ajouter set</button>
+              <button type="button" id="btnAddFieldSet" class="btn">+ Ajouter set</button>
             </div>
-            <p class="small-muted">Ces sets seront proposés dans les formulaires Propriété/Association.</p>
           </div>
           <ul id="ulFieldSets" class="small-muted"></ul>
         </fieldset>
 
         <div class="row-actions">
-          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          <button type="submit" class="btn btn-primary">Enregistrer le projet</button>
         </div>
       </form>
     </section>
 
-    <!-- PROPERTIES -->
+    <!-- ============ PROPRIÉTÉS ============ -->
     <section id="tab-properties" class="panel">
       <form id="formProperty" class="form-grid">
-        <!-- Modèle (property) -->
-        <fieldset>
+
+        <!-- Modèle -->
+        <fieldset class="sec-model">
           <legend>Modèle — Propriété</legend>
           <div class="grid-3">
-            <label>Nom technique (local)
+            <label>Nom technique
               <input name="qnameLocal" placeholder="ex: lightsaberColor" required />
             </label>
             <label>Title (libellé)
-              <input name="title" placeholder="ex: Couleur de sabre laser" />
+              <input name="title" placeholder="Couleur du sabre laser" />
             </label>
-            <label>Type (Alfresco)
+            <label>Type
               <select name="type">
-                <option>d:text</option>
-                <option>d:mltext</option>
-                <option>d:int</option>
-                <option>d:long</option>
-                <option>d:double</option>
-                <option>d:boolean</option>
-                <option>d:date</option>
-                <option>d:datetime</option>
-                <option>d:content</option>
+                <option>d:text</option><option>d:mltext</option><option>d:int</option>
+                <option>d:boolean</option><option>d:date</option><option>d:datetime</option>
                 <option>d:nodeRef</option>
               </select>
             </label>
@@ -118,80 +111,70 @@
             <label>Valeur par défaut
               <input name="default" placeholder="ex: bleu" />
             </label>
-            <label>DynList du projet
+            <label>DynList liée
               <select name="linkDynList">
                 <option value="">— aucune —</option>
               </select>
             </label>
           </div>
 
-          <div class="grid-3">
-            <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
-            <!-- Dans ce bloc Modèle, pas les options de formulaire -->
-            <div></div><div></div>
-          </div>
+          <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
         </fieldset>
 
-        <!-- Show (per property) -->
-        <fieldset>
+        <!-- Show -->
+        <fieldset class="sec-show">
           <legend>Show — Propriété</legend>
-          <div class="inline">
-            <label class="check"><input type="checkbox" name="showForceProp" /> Ajouter <code>force="true"</code></label>
-            <label class="check"><input type="checkbox" name="showForModeProp" /> Ajouter <code>for-mode="true"</code></label>
-          </div>
-          <p class="small-muted">Le &lt;show&gt; sera généré pour la propriété. Ces options n’affectent que cette propriété.</p>
+          <label class="check"><input type="checkbox" name="showForceProp" /> Ajouter <code>force="true"</code></label>
+          <label class="check"><input type="checkbox" name="showForModeProp" /> Ajouter <code>for-mode="true"</code></label>
         </fieldset>
 
-        <!-- Field (Share) -->
-        <fieldset>
+        <!-- Field -->
+        <fieldset class="sec-field">
           <legend>Field — Propriété</legend>
-
           <div class="grid-3">
             <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
-            <label class="check"><input type="checkbox" name="readOnlyForm" /> Read-only (form)</label>
-            <label>Field set (attribut set=…)
+            <label class="check"><input type="checkbox" name="readOnlyForm" /> Read-only</label>
+            <label>Field set
               <select name="fieldSet"></select>
             </label>
           </div>
 
           <div class="grid-3">
-            <label>Label ID (optionnel)
+            <label>Label ID
               <input name="labelId" placeholder="ex: sw.forms.field.lightsaberColor" />
             </label>
-            <label>Contrôle de field
+            <label>Type de contrôle
               <select name="fieldControl">
-                <option value="auto">Auto (par type)</option>
-                <option value="textfield">Texte (textfield.ftl)</option>
-                <option value="textarea">Texte long (textarea.ftl)</option>
-                <option value="assoc-auto">Association (autocomplete-association.ftl)</option>
-                <option value="noderef-auto">NodeRef / Hiérarchie (autocomplete.ftl)</option>
+                <option value="auto">Auto</option>
+                <option value="textfield">Texte court</option>
+                <option value="textarea">Texte long</option>
+                <option value="assoc-auto">Association (autocomplete-association)</option>
+                <option value="noderef-auto">Hiérarchie (autocomplete)</option>
               </select>
             </label>
-            <label>Max length (si textfield)
-              <input name="maxLength" type="number" min="0" placeholder="ex: 40" />
+            <label>Max length
+              <input name="maxLength" type="number" placeholder="ex: 40" />
             </label>
           </div>
 
-          <!-- Options si contrôle = association -->
+          <!-- Association options -->
           <div id="propAssocOptions" class="grid-3" style="display:none">
             <label>Datasource (ds)
-              <input name="assocDs" placeholder="ex: becpg/autocomplete/targetassoc/associations/sw:padawan?classNames=sw:jedi" />
+              <input name="assocDs" placeholder="ex: becpg/autocomplete/targetassoc/associations/sw:padawan" />
             </label>
-            <label>pageLinkTemplate (optionnel)
-              <input name="assocPageLinkTemplate" placeholder="ex: jedi-datasheet?nodeRef={nodeRef}" />
+            <label>pageLinkTemplate
+              <input name="assocPageLinkTemplate" placeholder="ex: jedi-profile?nodeRef={nodeRef}" />
             </label>
-            <div></div>
           </div>
 
-          <!-- Options si contrôle = d:nodeRef hiérarchique -->
+          <!-- NodeRef options -->
           <div id="propNodeRefOptions" class="grid-3" style="display:none">
             <label>Datasource (ds)
               <input name="nrDs" placeholder="ex: becpg/autocomplete/linkedvalue/values/System/JediOrder/sw:entityLists/jediHierarchy" />
             </label>
-            <label>Niveaux de hiérarchie (>=1)
-              <input name="nrLevels" type="number" min="1" value="1" />
+            <label>Niveaux hiérarchiques
+              <input name="nrLevels" type="number" value="1" min="1" />
             </label>
-            <div></div>
           </div>
         </fieldset>
 
@@ -202,11 +185,12 @@
       </form>
 
       <div class="list">
-        <h3>Propriétés</h3>
+        <h3>Propriétés existantes</h3>
         <table id="tblProperties" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th><th>Mand(M)</th><th>Mand(F)</th><th>RO(F)</th><th>DynList</th><th>Field set</th><th></th>
+              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th>
+              <th>Mand(M)</th><th>Mand(F)</th><th>RO</th><th>DynList</th><th>Set</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -214,83 +198,74 @@
       </div>
     </section>
 
-    <!-- ASSOCIATIONS -->
+    <!-- ============ ASSOCIATIONS ============ -->
     <section id="tab-assocs" class="panel">
       <form id="formAssoc" class="form-grid">
-        <!-- Modèle (association) -->
-        <fieldset>
+        <fieldset class="sec-model">
           <legend>Modèle — Association</legend>
           <div class="grid-3">
-            <label>Nom technique (local)
+            <label>Nom technique
               <input name="qnameLocal" placeholder="ex: master" required />
             </label>
             <label>Title
               <input name="title" placeholder="ex: Maître Jedi" />
             </label>
             <label>Classe cible
-              <input name="targetClass" value="sw:jediKnight" placeholder="ex: sw:jediKnight" />
+              <input name="targetClass" value="sw:jediKnight" />
             </label>
           </div>
+
           <div class="grid-3">
             <label>Source many
               <select name="sourceMany">
-                <option value="true" selected>true</option>
-                <option value="false">false</option>
+                <option value="true" selected>true</option><option value="false">false</option>
               </select>
             </label>
             <label>Target many
               <select name="targetMany">
-                <option value="false" selected>false</option>
-                <option value="true">true</option>
+                <option value="false" selected>false</option><option value="true">true</option>
               </select>
             </label>
-            <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
+            <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory</label>
           </div>
         </fieldset>
 
-        <!-- Show (association) -->
-        <fieldset>
+        <fieldset class="sec-show">
           <legend>Show — Association</legend>
-          <p class="small-muted">Un &lt;show&gt; sera généré pour l’association (pas d’options spécifiques ici).</p>
+          <p class="small-muted">Un &lt;show&gt; simple sera généré pour l’association.</p>
         </fieldset>
 
-        <!-- Field (Share) -->
-        <fieldset>
+        <fieldset class="sec-field">
           <legend>Field — Association</legend>
           <div class="grid-3">
-            <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
+            <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory</label>
             <label>Field set
               <select name="fieldSet"></select>
             </label>
-            <div></div>
           </div>
-
-          <fieldset>
-            <legend>Contrôle (association)</legend>
-            <div class="grid-3">
-              <label>Datasource (ds)
-                <input name="assocDs" placeholder="ex: becpg/autocomplete/targetassoc/associations/sw:apprentice?classNames=sw:padawan" />
-              </label>
-              <label>pageLinkTemplate (optionnel)
-                <input name="assocPageLinkTemplate" placeholder="ex: jedi-profile?nodeRef={nodeRef}" />
-              </label>
-              <div></div>
-            </div>
-          </fieldset>
+          <div class="grid-3">
+            <label>Datasource (ds)
+              <input name="assocDs" placeholder="ex: becpg/autocomplete/targetassoc/associations/sw:apprentice" />
+            </label>
+            <label>pageLinkTemplate
+              <input name="assocPageLinkTemplate" placeholder="ex: jedi-profile?nodeRef={nodeRef}" />
+            </label>
+          </div>
         </fieldset>
 
         <div class="row-actions">
-          <button type="submit" class="btn btn-primary" id="btnSaveAssoc">Ajouter association</button>
-          <button type="button" class="btn" id="btnCancelAssoc" style="display:none">Annuler</button>
+          <button type="submit" id="btnSaveAssoc" class="btn btn-primary">Ajouter association</button>
+          <button type="button" id="btnCancelAssoc" class="btn" style="display:none">Annuler</button>
         </div>
       </form>
 
       <div class="list">
-        <h3>Associations</h3>
+        <h3>Associations existantes</h3>
         <table id="tblAssocs" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th><th>Mand(M)</th><th>Mand(F)</th><th>Field set</th><th></th>
+              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th>
+              <th>Mand(M)</th><th>Mand(F)</th><th>Set</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -298,23 +273,22 @@
       </div>
     </section>
 
-    <!-- DYNLISTS -->
+    <!-- ============ DYNLISTS ============ -->
     <section id="tab-dynlists" class="panel">
       <form id="formDyn" class="form-grid">
         <fieldset>
-          <legend>DynList (valeurs) — Univers Star Wars</legend>
+          <legend>DynList — Exemples Star Wars</legend>
           <div class="grid-3">
-            <label>Nom logique de la liste
+            <label>Nom logique
               <input name="listName" placeholder="ex: swr_lightsaberColors" required />
             </label>
-            <label>Path (cm:... dans /System/Lists/…)
+            <label>Path (dans /System/Lists/…)
               <input name="listPath" placeholder="/System/Lists/bcpg:entityLists/swr_lightsaberColors" required />
             </label>
-            <div></div>
           </div>
 
-          <label>Coller vos lignes — format strict : <code>code:value</code> (une par ligne)
-            <textarea name="pasted" rows="8" placeholder="BLUE:Bleu
+          <label>Coller vos lignes <small>(format <code>code:value</code>)</small>
+            <textarea name="pasted" rows="6" placeholder="BLUE:Bleu
 GREEN:Vert
 RED:Rouge
 PURPLE:Violet"></textarea>
@@ -329,7 +303,6 @@ PURPLE:Violet"></textarea>
             <div class="grid-3">
               <label>code <input name="il_code" placeholder="ex: YELLOW" /></label>
               <label>value <input name="il_value" placeholder="ex: Jaune" /></label>
-              <div></div>
             </div>
             <div class="row-actions">
               <button type="button" id="btnInlineAdd" class="btn">+ Ajouter une ligne</button>
@@ -344,71 +317,66 @@ PURPLE:Violet"></textarea>
       </form>
 
       <div class="list">
-        <h3>DynLists</h3>
+        <h3>DynLists existantes</h3>
         <table id="tblDyn" class="table">
-          <thead>
-            <tr>
-              <th>Nom</th><th>Path</th><th>Entrées</th><th></th>
-            </tr>
-          </thead>
+          <thead><tr><th>Nom</th><th>Path</th><th>Entrées</th><th></th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </section>
 
-    <!-- PREVIEW -->
+    <!-- ============ APERÇU ============ -->
     <section id="tab-preview" class="panel">
       <div class="preview-grid">
         <div class="preview-block">
           <div class="block-head">
-            <h3>Fragment modèle – &lt;properties&gt;</h3>
+            <h3>&lt;properties&gt;</h3>
             <button class="btn btn-copy" data-copy="#outProps">Copier</button>
           </div>
-          <textarea id="outProps" rows="12" readonly></textarea>
+          <textarea id="outProps" rows="10" readonly></textarea>
         </div>
 
         <div class="preview-block">
           <div class="block-head">
-            <h3>Fragment modèle – &lt;associations&gt;</h3>
+            <h3>&lt;associations&gt;</h3>
             <button class="btn btn-copy" data-copy="#outAssocs">Copier</button>
           </div>
-          <textarea id="outAssocs" rows="12" readonly></textarea>
+          <textarea id="outAssocs" rows="10" readonly></textarea>
         </div>
 
         <div class="preview-block">
           <div class="block-head">
-            <h3>Fragment modèle – &lt;constraints&gt;</h3>
+            <h3>&lt;constraints&gt;</h3>
             <button class="btn btn-copy" data-copy="#outConstraints">Copier</button>
           </div>
-          <textarea id="outConstraints" rows="12" readonly></textarea>
+          <textarea id="outConstraints" rows="8" readonly></textarea>
         </div>
 
         <div class="preview-block">
           <div class="block-head">
-            <h3>Share – &lt;show&gt;</h3>
+            <h3>&lt;show&gt;</h3>
             <button class="btn btn-copy" data-copy="#outShow">Copier</button>
           </div>
-          <textarea id="outShow" rows="10" readonly></textarea>
+          <textarea id="outShow" rows="8" readonly></textarea>
         </div>
 
         <div class="preview-block">
           <div class="block-head">
-            <h3>Share – &lt;field&gt;</h3>
+            <h3>&lt;field&gt;</h3>
             <button class="btn btn-copy" data-copy="#outField">Copier</button>
           </div>
-          <textarea id="outField" rows="16" readonly></textarea>
+          <textarea id="outField" rows="12" readonly></textarea>
         </div>
       </div>
 
       <div class="export-actions">
-        <button id="btnBuild" class="btn btn-primary">Construire fragments</button>
-        <button id="btnDownloadZip" class="btn">Télécharger ZIP</button>
+        <button id="btnDownloadZip" class="btn btn-primary">Télécharger ZIP</button>
       </div>
     </section>
   </main>
 
   <footer class="app-footer">
-    <small>Made for Alfresco/beCPG · 100% client-side</small>
+    <small>✨ Que la Force soit avec vos modèles ✨</small>
   </footer>
 
   <script src="app.js"></script>
