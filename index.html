@@ -35,13 +35,13 @@
         <fieldset>
           <legend>Infos projet</legend>
           <label>Nom du projet
-            <input name="projectName" placeholder="ex: Adisseo Labeling" />
+            <input name="projectName" placeholder="ex: Star Wars – Death Star Config" />
           </label>
           <label>Namespace prefix
-            <input name="nsPrefix" placeholder="ex: brn" />
+            <input name="nsPrefix" placeholder="ex: swr" />
           </label>
           <label>Namespace URI
-            <input name="nsUri" placeholder="ex: http://example.com/brn/1.0" />
+            <input name="nsUri" placeholder="ex: http://galactic.empire/swr/1.0" />
           </label>
         </fieldset>
 
@@ -58,22 +58,19 @@
               <input name="defaultLocale" value="fr" />
             </label>
           </div>
-          <div class="inline">
-            <label class="check"><input type="checkbox" name="includeContainers" checked />
-              Inclure &lt;properties&gt; / &lt;associations&gt; / &lt;constraints&gt;</label>
-          </div>
         </fieldset>
 
         <fieldset>
           <legend>Conteneurs & Sets</legend>
           <div class="inline">
+            <label class="check"><input type="checkbox" name="includeContainers" checked /> Inclure &lt;properties&gt; / &lt;associations&gt; / &lt;constraints&gt;</label>
             <label class="check"><input type="checkbox" name="containerProperties" checked /> Générer des propriétés</label>
             <label class="check"><input type="checkbox" name="containerAssociations" checked /> Générer des associations</label>
           </div>
           <div>
             <label>Sets disponibles (pour l’attribut set des &lt;field&gt;)</label>
             <div class="inline">
-              <input name="newFieldSet" placeholder="ex: referentialData" />
+              <input name="newFieldSet" placeholder="ex: imperialConfig" />
               <button type="button" id="btnAddFieldSet" class="btn">Ajouter set</button>
             </div>
             <p class="small-muted">Ces sets seront proposés dans les formulaires Propriété/Association.</p>
@@ -90,14 +87,15 @@
     <!-- PROPERTIES -->
     <section id="tab-properties" class="panel">
       <form id="formProperty" class="form-grid">
+        <!-- Modèle (property) -->
         <fieldset>
-          <legend><span id="propFormLegend">Nouvelle propriété</span></legend>
+          <legend>Modèle — Propriété</legend>
           <div class="grid-3">
             <label>Nom technique (local)
-              <input name="qnameLocal" placeholder="ex: go1Decision" required />
+              <input name="qnameLocal" placeholder="ex: lightsaberColor" required />
             </label>
             <label>Title (libellé)
-              <input name="title" placeholder="ex: Décision GO1" />
+              <input name="title" placeholder="ex: Couleur de sabre laser" />
             </label>
             <label>Type (Alfresco)
               <select name="type">
@@ -118,22 +116,47 @@
           <div class="grid-3">
             <label class="check"><input type="checkbox" name="multiple" /> Multiple</label>
             <label>Valeur par défaut
-              <input name="default" />
+              <input name="default" placeholder="ex: bleu" />
             </label>
-            <label>Label ID (optionnel)
-              <input name="labelId" placeholder="ex: becpg.forms.field.tradeName" />
+            <label>DynList du projet
+              <select name="linkDynList">
+                <option value="">— aucune —</option>
+              </select>
             </label>
           </div>
 
           <div class="grid-3">
             <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
+            <!-- Dans ce bloc Modèle, pas les options de formulaire -->
+            <div></div><div></div>
+          </div>
+        </fieldset>
+
+        <!-- Show (per property) -->
+        <fieldset>
+          <legend>Show — Propriété</legend>
+          <div class="inline">
+            <label class="check"><input type="checkbox" name="showForceProp" /> Ajouter <code>force="true"</code></label>
+            <label class="check"><input type="checkbox" name="showForModeProp" /> Ajouter <code>for-mode="true"</code></label>
+          </div>
+          <p class="small-muted">Le &lt;show&gt; sera généré pour la propriété. Ces options n’affectent que cette propriété.</p>
+        </fieldset>
+
+        <!-- Field (Share) -->
+        <fieldset>
+          <legend>Field — Propriété</legend>
+
+          <div class="grid-3">
             <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
             <label class="check"><input type="checkbox" name="readOnlyForm" /> Read-only (form)</label>
+            <label>Field set (attribut set=…)
+              <select name="fieldSet"></select>
+            </label>
           </div>
 
           <div class="grid-3">
-            <label>Field set (attribut set=…)
-              <select name="fieldSet"></select>
+            <label>Label ID (optionnel)
+              <input name="labelId" placeholder="ex: sw.forms.field.lightsaberColor" />
             </label>
             <label>Contrôle de field
               <select name="fieldControl">
@@ -149,27 +172,21 @@
             </label>
           </div>
 
-          <div class="grid-3">
-            <label class="check"><input type="checkbox" name="showForce" /> &lt;show&gt; force="true"</label>
-            <label class="check"><input type="checkbox" name="showForMode" /> &lt;show&gt; for-mode="true"</label>
-            <label>DynList appliquée
-              <select name="linkDynList"><option value="">— aucune —</option></select>
-            </label>
-          </div>
-
+          <!-- Options si contrôle = association -->
           <div id="propAssocOptions" class="grid-3" style="display:none">
             <label>Datasource (ds)
-              <input name="assocDs" placeholder="becpg/autocomplete/targetassoc/associations/..." />
+              <input name="assocDs" placeholder="ex: becpg/autocomplete/targetassoc/associations/sw:padawan?classNames=sw:jedi" />
             </label>
             <label>pageLinkTemplate (optionnel)
-              <input name="assocPageLinkTemplate" placeholder="entity-data-lists?list=...&amp;nodeRef={nodeRef}" />
+              <input name="assocPageLinkTemplate" placeholder="ex: jedi-datasheet?nodeRef={nodeRef}" />
             </label>
             <div></div>
           </div>
 
+          <!-- Options si contrôle = d:nodeRef hiérarchique -->
           <div id="propNodeRefOptions" class="grid-3" style="display:none">
             <label>Datasource (ds)
-              <input name="nrDs" placeholder="becpg/autocomplete/linkedvalue/values/System/..." />
+              <input name="nrDs" placeholder="ex: becpg/autocomplete/linkedvalue/values/System/JediOrder/sw:entityLists/jediHierarchy" />
             </label>
             <label>Niveaux de hiérarchie (>=1)
               <input name="nrLevels" type="number" min="1" value="1" />
@@ -189,7 +206,7 @@
         <table id="tblProperties" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th><th>Mand(M)</th><th>Mand(F)</th><th>RO(F)</th><th>DynList</th><th>Field set</th><th>Show opts</th><th></th>
+              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th><th>Mand(M)</th><th>Mand(F)</th><th>RO(F)</th><th>DynList</th><th>Field set</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -200,24 +217,18 @@
     <!-- ASSOCIATIONS -->
     <section id="tab-assocs" class="panel">
       <form id="formAssoc" class="form-grid">
+        <!-- Modèle (association) -->
         <fieldset>
-          <legend><span id="assocFormLegend">Nouvelle association</span></legend>
+          <legend>Modèle — Association</legend>
           <div class="grid-3">
             <label>Nom technique (local)
-              <input name="qnameLocal" placeholder="ex: actorProjectLeader" required />
+              <input name="qnameLocal" placeholder="ex: master" required />
             </label>
             <label>Title
-              <input name="title" placeholder="ex: Project Leader" />
+              <input name="title" placeholder="ex: Maître Jedi" />
             </label>
             <label>Classe cible
-              <input name="targetClass" value="cm:person" />
-            </label>
-          </div>
-          <div class="grid-3">
-            <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
-            <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
-            <label>Field set
-              <select name="fieldSet"></select>
+              <input name="targetClass" value="sw:jediKnight" placeholder="ex: sw:jediKnight" />
             </label>
           </div>
           <div class="grid-3">
@@ -233,6 +244,24 @@
                 <option value="true">true</option>
               </select>
             </label>
+            <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
+          </div>
+        </fieldset>
+
+        <!-- Show (association) -->
+        <fieldset>
+          <legend>Show — Association</legend>
+          <p class="small-muted">Un &lt;show&gt; sera généré pour l’association (pas d’options spécifiques ici).</p>
+        </fieldset>
+
+        <!-- Field (Share) -->
+        <fieldset>
+          <legend>Field — Association</legend>
+          <div class="grid-3">
+            <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
+            <label>Field set
+              <select name="fieldSet"></select>
+            </label>
             <div></div>
           </div>
 
@@ -240,17 +269,10 @@
             <legend>Contrôle (association)</legend>
             <div class="grid-3">
               <label>Datasource (ds)
-                <input name="assocDs" placeholder="becpg/autocomplete/targetassoc/associations/..." />
+                <input name="assocDs" placeholder="ex: becpg/autocomplete/targetassoc/associations/sw:apprentice?classNames=sw:padawan" />
               </label>
               <label>pageLinkTemplate (optionnel)
-                <input name="assocPageLinkTemplate" placeholder="entity-data-lists?list=...&amp;nodeRef={nodeRef}" />
-              </label>
-              <label class="check"><input type="checkbox" name="showForce" /> &lt;show&gt; force="true"</label>
-            </div>
-            <div class="grid-3">
-              <label class="check"><input type="checkbox" name="showForMode" /> &lt;show&gt; for-mode="true"</label>
-              <label>DynList appliquée
-                <select name="linkDynList"><option value="">— aucune —</option></select>
+                <input name="assocPageLinkTemplate" placeholder="ex: jedi-profile?nodeRef={nodeRef}" />
               </label>
               <div></div>
             </div>
@@ -268,7 +290,7 @@
         <table id="tblAssocs" class="table">
           <thead>
             <tr>
-              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th><th>Mand(M)</th><th>Mand(F)</th><th>Field set</th><th>DynList</th><th>Show opts</th><th></th>
+              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th><th>Mand(M)</th><th>Mand(F)</th><th>Field set</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -280,20 +302,22 @@
     <section id="tab-dynlists" class="panel">
       <form id="formDyn" class="form-grid">
         <fieldset>
-          <legend><span id="dynFormLegend">Nouvelle DynList</span></legend>
+          <legend>DynList (valeurs) — Univers Star Wars</legend>
           <div class="grid-3">
             <label>Nom logique de la liste
-              <input name="listName" placeholder="ex: brn_goDecision" required />
+              <input name="listName" placeholder="ex: swr_lightsaberColors" required />
             </label>
             <label>Path (cm:... dans /System/Lists/…)
-              <input name="listPath" placeholder="/System/Lists/bcpg:entityLists/brn_goDecision" required />
+              <input name="listPath" placeholder="/System/Lists/bcpg:entityLists/swr_lightsaberColors" required />
             </label>
             <div></div>
           </div>
 
-          <label>Coller vos lignes — format strict : <code>code:value</code> (une ligne par entrée)
-            <textarea name="pasted" rows="8" placeholder="GO:GO
-NO_GO:NO GO"></textarea>
+          <label>Coller vos lignes — format strict : <code>code:value</code> (une par ligne)
+            <textarea name="pasted" rows="8" placeholder="BLUE:Bleu
+GREEN:Vert
+RED:Rouge
+PURPLE:Violet"></textarea>
           </label>
 
           <div class="row-actions">
@@ -303,8 +327,8 @@ NO_GO:NO GO"></textarea>
           <fieldset>
             <legend>Ajout inline</legend>
             <div class="grid-3">
-              <label>code <input name="il_code" /></label>
-              <label>value <input name="il_value" /></label>
+              <label>code <input name="il_code" placeholder="ex: YELLOW" /></label>
+              <label>value <input name="il_value" placeholder="ex: Jaune" /></label>
               <div></div>
             </div>
             <div class="row-actions">
