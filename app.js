@@ -845,24 +845,36 @@ Namespace: ${ns()} (${state.project.namespaceUri || "-"})
    ========== INIT ============
    ============================ */
 (function init(){
-  loadState();
-  Project.populateForm();
-  Project.bind();
+  const boot = ()=>{
+    try{
+      loadState();
+      Project.populateForm();
+      Project.bind();
 
-  Properties.bind();
-  Properties.resetForm();
-  Properties.render();
+      Properties.bind();
+      Properties.resetForm();
+      Properties.render();
 
-  Assocs.bind();
-  Assocs.resetForm();
-  Assocs.render();
+      Assocs.bind();
+      Assocs.resetForm();
+      Assocs.render();
 
-  Dyn.bind();
-  Dyn.resetForm();
-  Dyn.render();
+      Dyn.bind();
+      Dyn.resetForm();
+      Dyn.render();
 
-  Preview.buildAll();
+      Preview.buildAll();
 
-  // défaut côté assoc (au cas où le navigateur se souvient)
-  $("#formAssoc select[name='sourceMany']").value ||= "true";
+      // défaut côté assoc (au cas où)
+      document.querySelector("#formAssoc select[name='sourceMany']")?.value ||= "true";
+    }catch(err){
+      console.error("[init] erreur de démarrage:", err);
+      alert("Erreur de démarrage de l'application (voir console).");
+    }
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
 })();
