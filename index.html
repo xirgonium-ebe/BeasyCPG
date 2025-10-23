@@ -1,111 +1,110 @@
-<!doctype html>
-<html lang="fr">
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Alfresco Generator – Model / Forms / DynLists</title>
+  <title>Holocron — Générateur de balises Alfresco (Star Wars)</title>
+  <meta name="description" content="Générer des balises Alfresco (model/form) et fichiers d’import dynlists. Thème Star Wars. IndexedDB.">
   <link rel="stylesheet" href="styles.css" />
-  <!-- JSZip pour export ZIP (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
-  <header class="app-header">
-    <h1>Alfresco/beCPG – Générateur de balises & imports</h1>
-    <div class="header-actions">
-      <button id="btnExportJSON" class="btn">Exporter projet (.json)</button>
-      <label class="file-label">
-        Importer projet (.json)
-        <input type="file" id="fileImportJSON" accept=".json" />
-      </label>
-      <button id="btnReset" class="btn btn-danger">Réinitialiser</button>
+  <!-- Header / App Bar -->
+  <header class="app-header" role="banner">
+    <div class="header-left">
+      <div class="logo" aria-hidden="true">🛰️</div>
+      <h1 class="app-title">Holocron — Générateur de balises Alfresco</h1>
+      <span class="subtitle">Jedi vs Sith • Classic Trilogy UI</span>
+    </div>
+    <div class="header-right">
+      <button id="themeToggle" class="icon-btn" title="Basculer clair/sombre" aria-pressed="false" aria-label="Basculer le thème">
+        <span class="icon-sun" aria-hidden="true">🌞</span>
+        <span class="icon-moon" aria-hidden="true">🌒</span>
+      </button>
     </div>
   </header>
 
-  <nav class="tabs">
-    <button data-tab="project" class="tab active">Projet</button>
-    <button data-tab="properties" class="tab">Propriétés</button>
-    <button data-tab="assocs" class="tab">Associations</button>
-    <button data-tab="dynlists" class="tab">DynLists</button>
-    <button data-tab="preview" class="tab">Aperçu & Export</button>
+  <!-- Tabs Navigation -->
+  <nav class="tabs" role="tablist" aria-label="Navigation principale">
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="tab-projet" id="tabbtn-projet" data-tab="projet">Projet</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-proprietes" id="tabbtn-proprietes" data-tab="proprietes">Propriétés</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-associations" id="tabbtn-associations" data-tab="associations">Associations</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-dynlists" id="tabbtn-dynlists" data-tab="dynlists">Dynlists</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-generation" id="tabbtn-generation" data-tab="generation">Génération</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-export" id="tabbtn-export" data-tab="export">Export / Import</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-parametres" id="tabbtn-parametres" data-tab="parametres">Paramètres</button>
   </nav>
 
-  <main>
-    <!-- PROJECT -->
-    <section id="tab-project" class="panel active">
-      <form id="formProject" class="form-grid">
-        <fieldset>
-          <legend>Infos projet</legend>
-          <label>
-            Nom du projet
-            <input name="projectName" placeholder="ex: Adisseo Labeling" />
-          </label>
-          <label>
-            Namespace prefix
-            <input name="nsPrefix" placeholder="ex: brn" />
-          </label>
-          <label>
-            Namespace URI
-            <input name="nsUri" placeholder="ex: http://example.com/brn/1.0" />
-          </label>
-        </fieldset>
+  <main class="tabpanels">
+    <!-- PROJET -->
+    <section id="tab-projet" class="tabpanel active" role="tabpanel" aria-labelledby="tabbtn-projet">
+      <div class="panel-header">
+        <h2>Projet</h2>
+        <p class="muted">Définis les métadonnées & options globales. Les fragments de génération sont activés par défaut.</p>
+      </div>
 
-        <fieldset>
-          <legend>Paramètres généraux</legend>
-          <label>
-            QName contrainte DynList
-            <input name="dynQName" value="bcpg:dynListConstraint" />
-          </label>
-          <label>
-            Nom du paramètre “chemin de liste”
-            <input name="dynPathParam" value="list-path" />
-          </label>
-          <label>
-            Locale par défaut
-            <input name="defaultLocale" value="fr" />
-          </label>
-          <label class="check">
-            <input type="checkbox" name="includeContainers" checked />
-            Inclure les balises conteneurs (&lt;properties&gt;, &lt;associations&gt;, &lt;constraints&gt;)
-          </label>
-        </fieldset>
+      <form id="projectForm" class="grid two">
+        <div class="field">
+          <label for="projectName">Nom du projet</label>
+          <input id="projectName" name="projectName" type="text" placeholder="Operation Sabre Bleu" autocomplete="off" required />
+        </div>
 
-        <fieldset>
-          <legend>Conteneur de définitions</legend>
-          <div class="inline">
-            <label class="check">
-              <input type="checkbox" name="containerProperties" checked />
-              Générer des propriétés
-            </label>
-            <label class="check">
-              <input type="checkbox" name="containerAssociations" checked />
-              Générer des associations
-            </label>
+        <div class="field">
+          <label for="projectNamespace">Namespace</label>
+          <input id="projectNamespace" name="projectNamespace" type="text" placeholder="jdi" maxlength="20" pattern="[a-zA-Z][\w\-]*" required />
+          <small class="hint">Servira de préfixe (ex. <code>jdi:myProp</code>).</small>
+        </div>
+
+        <div class="field col-span-2">
+          <label for="projectSets">Sets de formulaire (liste séparée par des virgules)</label>
+          <input id="projectSets" name="projectSets" type="text" placeholder="mainInfo, hangar-brief, droid-config" />
+          <small class="hint">Le set par défaut est <code>mainInfo</code> si vide.</small>
+        </div>
+
+        <div class="field inline">
+          <label class="switch">
+            <input id="toggleContainers" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+          <div>
+            <strong>Inclure balises conteneurs <code>&lt;properties&gt;</code> et <code>&lt;associations&gt;</code> dans le model</strong><br/>
+            <small class="muted">Par défaut, l’appli génère des <em>fragments</em> sans conteneurs.</small>
           </div>
-        </fieldset>
+        </div>
 
-        <div class="row-actions">
-          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <div class="actions col-span-2">
+          <button type="button" id="saveProjectBtn" class="btn primary">💾 Sauvegarder</button>
+          <button type="button" id="newProjectBtn" class="btn">🆕 Nouveau</button>
+          <button type="button" id="deleteProjectBtn" class="btn danger">🗑️ Supprimer</button>
+          <div class="spacer"></div>
+          <select id="projectPicker" title="Ouvrir un projet existant"></select>
+          <button type="button" id="openProjectBtn" class="btn">📂 Ouvrir</button>
         </div>
       </form>
     </section>
 
-    <!-- PROPERTIES -->
-    <section id="tab-properties" class="panel">
-      <form id="formProperty" class="form-grid">
-        <fieldset>
-          <legend>Nouvelle propriété</legend>
-          <div class="grid-3">
-            <label>
-              Nom technique (local)
-              <input name="qnameLocal" placeholder="ex: go1Decision" required />
-            </label>
-            <label>
-              Title (libellé)
-              <input name="title" placeholder="ex: Décision GO1" />
-            </label>
-            <label>
-              Type (Alfresco)
-              <select name="type">
+    <!-- PROPRIÉTÉS -->
+    <section id="tab-proprietes" class="tabpanel" role="tabpanel" aria-labelledby="tabbtn-proprietes">
+      <div class="panel-header">
+        <h2>Propriétés</h2>
+        <p class="muted">Ajoute, édite, supprime. Les noms techniques sont uniques au projet et seront préfixés par le namespace à la génération.</p>
+      </div>
+
+      <form id="propForm" class="card stack">
+        <fieldset class="stack">
+          <legend>Général</legend>
+          <div class="grid three">
+            <div class="field">
+              <label for="propTechName">Nom technique</label>
+              <input id="propTechName" type="text" placeholder="projectHierarchy1" pattern="[a-zA-Z][\w\-]*" required />
+            </div>
+            <div class="field">
+              <label for="propTitle">Nom classique (title)</label>
+              <input id="propTitle" type="text" placeholder="Hiérarchie Projet (Niveau 1)" />
+            </div>
+            <div class="field">
+              <label for="propType">Type de données</label>
+              <select id="propType" required>
+                <option value="">— sélectionner —</option>
                 <option>d:text</option>
                 <option>d:mltext</option>
                 <option>d:int</option>
@@ -114,216 +113,465 @@
                 <option>d:boolean</option>
                 <option>d:date</option>
                 <option>d:datetime</option>
-                <option>d:content</option>
+                <option>d:qname</option>
+                <option>d:noderef</option>
               </select>
-            </label>
+            </div>
           </div>
 
-          <div class="grid-3">
-            <label class="check"><input type="checkbox" name="multiple" /> Multiple</label>
-            <label>
-              Valeur par défaut
-              <input name="default" />
+          <div class="field inline">
+            <label class="switch">
+              <input id="propMandatoryModel" type="checkbox" />
+              <span class="slider"></span>
             </label>
-            <div></div>
-          </div>
-
-          <div class="grid-3">
-            <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
-            <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
-            <label class="check"><input type="checkbox" name="readOnlyForm" /> Read-only (form)</label>
+            <div>
+              <strong>Mandatory (model)</strong><br/>
+              <small class="muted">Génère la balise dédiée côté modèle.</small>
+            </div>
           </div>
         </fieldset>
 
-        <fieldset>
-          <legend>Contrainte (optionnelle)</legend>
-          <div class="grid-3">
-            <label>
-              Nom de la contrainte
-              <input name="constraintName" placeholder="ex: brn:goDecisionList" />
-            </label>
-            <label>
-              Type de contrainte
-              <input name="constraintType" value="bcpg:dynListConstraint" />
-            </label>
-            <label>
-              Chemin de la liste (DynList)
-              <input name="dynPath" placeholder="/app:company_home/cm:System/cm:Lists/bcpg:entityLists/cm:ma_liste" />
-            </label>
+        <fieldset class="stack">
+          <legend>Field</legend>
+          <div class="grid three">
+            <div class="field">
+              <label for="propSet">Set</label>
+              <input id="propSet" type="text" placeholder="mainInfo" />
+            </div>
+            <div class="field inline">
+              <label class="switch">
+                <input id="propMandatoryField" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+              <div>
+                <strong>mandatory="true"</strong><br/>
+                <small class="muted">Obligation côté field.</small>
+              </div>
+            </div>
+            <div class="field inline">
+              <label class="switch">
+                <input id="propReadOnly" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+              <div>
+                <strong>read-only="true"</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid three">
+            <div class="field">
+              <label for="propHelpId">help-id (optionnel)</label>
+              <input id="propHelpId" type="text" placeholder="becpg.forms.help.projectHierarchy2" />
+            </div>
+
+            <div class="field" data-conditional="propType=d:text">
+              <label for="propTextareaRows">Textarea (rows)</label>
+              <input id="propTextareaRows" type="number" min="1" step="1" placeholder="2" />
+              <small class="hint">Ajoute <code>&lt;control-param name="rows"&gt;</code> si renseigné.</small>
+            </div>
+
+            <div class="field" data-conditional="propType=d:noderef">
+              <label for="propAutocompleteDs">Autocomplete DS (nodeRef non hiérarchique)</label>
+              <input id="propAutocompleteDs" type="text" placeholder="becpg/autocomplete/linkedvalue/values/System/ProjectLists/bcpg:entityLists/tatooine_outpost" />
+              <small class="hint">Chemin de données — exemple : dépôt impérial sur <strong>Tatooine</strong>.</small>
+            </div>
+          </div>
+
+          <div class="grid two" data-conditional="propType=d:text">
+            <div class="field">
+              <label for="propDynlistSelect">Contrainte Dynlist (si d:text)</label>
+              <select id="propDynlistSelect">
+                <option value="">— aucune —</option>
+              </select>
+              <small class="hint">Sélectionne une dynlist existante du projet.</small>
+            </div>
           </div>
         </fieldset>
 
-        <div class="row-actions">
-          <button type="submit" class="btn btn-primary">Ajouter propriété</button>
+        <fieldset class="stack">
+          <legend>Show</legend>
+          <div class="grid two">
+            <div class="field inline">
+              <label class="switch">
+                <input id="propShowForView" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+              <div><strong>for-mode="view"</strong></div>
+            </div>
+            <div class="field inline">
+              <label class="switch">
+                <input id="propShowForce" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+              <div><strong>force="true"</strong></div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="stack" data-conditional="propType=d:noderef">
+          <legend>Hiérarchie (d:noderef)</legend>
+          <div class="grid two">
+            <div class="field">
+              <label for="hierName">Nom de la hiérarchie</label>
+              <input id="hierName" type="text" placeholder="project_Hierarchy" />
+            </div>
+            <div class="field">
+              <label for="hierDs">Chemin DS</label>
+              <input id="hierDs" type="text" placeholder="becpg/autocomplete/linkedvalue/values/System/ProjectLists/bcpg:entityLists/project_Hierarchy" />
+            </div>
+          </div>
+
+          <div class="hier-levels">
+            <div class="levels-header">
+              <strong>Niveaux</strong>
+              <button type="button" id="addHierLevelBtn" class="btn small">➕ Ajouter un niveau</button>
+            </div>
+            <ol id="hierLevelsList" class="levels-list">
+              <!-- niveaux générés dynamiquement (level, parent) -->
+            </ol>
+            <small class="muted">Le parent utilisera l’ID avec <code>:</code> remplacé par <code>_</code> (ex: <code>jdi_projectHierarchy1</code>).</small>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="button" id="addPropBtn" class="btn primary">➕ Ajouter / Mettre à jour</button>
+          <button type="reset" class="btn">↺ Réinitialiser</button>
         </div>
       </form>
 
-      <div class="list">
-        <h3>Propriétés</h3>
-        <table id="tblProperties" class="table">
-          <thead>
-            <tr>
-              <th>QName</th><th>Title</th><th>Type</th><th>Multi</th><th>Def</th><th>Mand(M)</th><th>Mand(F)</th><th>RO(F)</th><th>Constraint</th><th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="list-section">
+        <h3>Propriétés du projet</h3>
+        <ul id="propList" class="item-list">
+          <!-- lignes propriété -->
+        </ul>
       </div>
     </section>
 
     <!-- ASSOCIATIONS -->
-    <section id="tab-assocs" class="panel">
-      <form id="formAssoc" class="form-grid">
-        <fieldset>
-          <legend>Nouvelle association</legend>
-          <div class="grid-3">
-            <label>
-              Nom technique (local)
-              <input name="qnameLocal" placeholder="ex: actorProjectLeader" required />
-            </label>
-            <label>
-              Title
-              <input name="title" placeholder="ex: Project Leader" />
-            </label>
-            <label>
-              Classe cible
-              <input name="targetClass" value="cm:person" />
-            </label>
+    <section id="tab-associations" class="tabpanel" role="tabpanel" aria-labelledby="tabbtn-associations">
+      <div class="panel-header">
+        <h2>Associations</h2>
+        <p class="muted">Définis les liaisons (source/target) et leurs options de rendu (field).</p>
+      </div>
+
+      <form id="assocForm" class="card stack">
+        <fieldset class="stack">
+          <legend>Général</legend>
+          <div class="grid three">
+            <div class="field">
+              <label for="assocTechName">Nom technique</label>
+              <input id="assocTechName" type="text" placeholder="currentMRDRCodeOfSKU" pattern="[a-zA-Z][\w\-]*" required />
+            </div>
+            <div class="field">
+              <label for="assocTitle">Nom classique (title)</label>
+              <input id="assocTitle" type="text" placeholder="Current MRDR Code of SKU (NA for Innovation)" />
+            </div>
+            <div class="field">
+              <label for="assocTargetClass">Class cible</label>
+              <input id="assocTargetClass" type="text" placeholder="bcpg:product" />
+            </div>
           </div>
-          <div class="grid-3">
-            <label class="check"><input type="checkbox" name="mandatoryModel" /> Mandatory (modèle)</label>
-            <label class="check"><input type="checkbox" name="mandatoryForm" /> Mandatory (form)</label>
-            <div></div>
-          </div>
-          <div class="grid-3">
-            <label>Source many
-              <select name="sourceMany">
-                <option value="false">false</option>
-                <option value="true">true</option>
-              </select>
-            </label>
-            <label>Target many
-              <select name="targetMany">
-                <option value="false">false</option>
-                <option value="true">true</option>
-              </select>
-            </label>
-            <div></div>
+
+          <div class="grid three">
+            <div class="field inline">
+              <label class="switch">
+                <input id="assocSourceMany" type="checkbox" checked />
+                <span class="slider"></span>
+              </label>
+              <div><strong>Source many</strong> (par défaut true)</div>
+            </div>
+            <div class="field inline">
+              <label class="switch">
+                <input id="assocTargetMany" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+              <div><strong>Target many</strong></div>
+            </div>
+            <div class="field">
+              <label for="assocSet">Set (field)</label>
+              <input id="assocSet" type="text" placeholder="mainInfo" />
+            </div>
           </div>
         </fieldset>
-        <div class="row-actions">
-          <button type="submit" class="btn btn-primary">Ajouter association</button>
+
+        <fieldset class="stack">
+          <legend>Field</legend>
+          <div class="grid two">
+            <div class="field">
+              <label for="assocHelpId">help-id (optionnel)</label>
+              <input id="assocHelpId" type="text" placeholder="becpg.forms.help.entityTplRef" />
+            </div>
+            <div class="field">
+              <label for="assocPageLink">pageLinkTemplate (optionnel)</label>
+              <input id="assocPageLink" type="text" placeholder="entity-data-lists?list=View-properties&amp;nodeRef={nodeRef}" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="assocDs">Autocomplete association DS</label>
+            <input id="assocDs" type="text" placeholder="becpg/autocomplete/targetassoc/associations/jdi:project?classNames=jdi:project,bcpg:entityTplAspect&amp;excludeProps=bcpg:entityTplEnabled%7Cfalse" />
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="button" id="addAssocBtn" class="btn primary">➕ Ajouter / Mettre à jour</button>
+          <button type="reset" class="btn">↺ Réinitialiser</button>
         </div>
       </form>
 
-      <div class="list">
-        <h3>Associations</h3>
-        <table id="tblAssocs" class="table">
-          <thead>
-            <tr>
-              <th>QName</th><th>Title</th><th>Target</th><th>S-many</th><th>T-many</th><th>Mand(M)</th><th>Mand(F)</th><th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="list-section">
+        <h3>Associations du projet</h3>
+        <ul id="assocList" class="item-list">
+          <!-- lignes association -->
+        </ul>
       </div>
     </section>
 
     <!-- DYNLISTS -->
-    <section id="tab-dynlists" class="panel">
-      <form id="formDyn" class="form-grid">
-        <fieldset>
-          <legend>Nouvelle DynList</legend>
-          <div class="grid-3">
-            <label>Nom logique de la liste
-              <input name="listName" placeholder="ex: brn_goDecision" required />
-            </label>
-            <label>Chemin dans Alfresco
-              <input name="listPath" placeholder="/app:company_home/cm:System/cm:Lists/bcpg:entityLists/cm:brn_goDecision" required />
-            </label>
-            <div></div>
+    <section id="tab-dynlists" class="tabpanel" role="tabpanel" aria-labelledby="tabbtn-dynlists">
+      <div class="panel-header">
+        <h2>Dynlists</h2>
+        <p class="muted">Créer/éditer une liste de valeurs. Le CSV exporté est unique par liste et forcé au séparateur <code>;</code>.</p>
+      </div>
+
+      <form id="dynForm" class="card stack">
+        <div class="grid three">
+          <div class="field">
+            <label for="dynTechName">Nom technique (<code>&lt;list_name&gt;</code>)</label>
+            <input id="dynTechName" type="text" placeholder="rebellion_ranks" pattern="[\w\-]+" required />
           </div>
-          <label>
-            Coller vos lignes (CSV/TSV) – colonnes supportées : code;value;locale;active;order;parent
-            <textarea name="pasted" rows="8" placeholder="code;value;locale;active;order
-GO;GO;fr;true;1
-NO_GO;NO GO;fr;true;2"></textarea>
-          </label>
-          <div class="row-actions">
-            <button type="button" id="btnParseDyn" class="btn">Analyser</button>
-            <button type="submit" class="btn btn-primary">Ajouter DynList</button>
+          <div class="field">
+            <label for="dynDisplayName">Nom commun</label>
+            <input id="dynDisplayName" type="text" placeholder="Grades de l’Alliance" />
           </div>
-        </fieldset>
+          <div class="field">
+            <label for="dynPath">Chemin</label>
+            <input id="dynPath" type="text" placeholder="/System/Lists/bcpg:entityLists/rebellion_ranks" />
+            <small class="hint">Par défaut : <code>/System/Lists/bcpg:entityLists/&lt;list_name&gt;</code></small>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="field">
+            <label for="dynCsvPaste">Coller CSV / TSV (2 colonnes exactes <code>code;value</code>)</label>
+            <textarea id="dynCsvPaste" rows="6" placeholder="#;Code;Valeur&#10;LVL_JEDI;Jedi Knight&#10;LVL_MASTER;Jedi Master"></textarea>
+            <small class="hint">Le séparateur <strong>doit</strong> être <code>;</code>. Les <code>,</code> seront convertis en <code>;</code> automatiquement au collage.</small>
+          </div>
+          <div class="field">
+            <label>Données (éditeur en ligne)</label>
+            <div class="table-editor">
+              <div class="row">
+                <input class="cell code" type="text" placeholder="LVL_PADAWAN" />
+                <input class="cell value" type="text" placeholder="Padawan" />
+                <button type="button" class="row-del btn small danger" title="Supprimer">✖</button>
+              </div>
+            </div>
+            <button type="button" id="dynAddRowBtn" class="btn small">➕ Ajouter une ligne</button>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="field inline">
+            <label class="switch">
+              <input id="dynAddEmpty" type="checkbox" checked />
+              <span class="slider"></span>
+            </label>
+            <div>
+              <strong>addEmptyValue = true</strong><br/>
+              <small class="muted">Paramètre de la contrainte DynListConstraint.</small>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="dynConstraintName">Nom de contrainte (auto)</label>
+            <input id="dynConstraintName" type="text" placeholder="jdi:rebellion_ranksConstraint" />
+            <small class="hint">Par défaut : <code>&lt;namespace&gt;:&lt;list_name&gt;Constraint</code></small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="addDynBtn" class="btn primary">➕ Ajouter / Mettre à jour</button>
+          <button type="reset" class="btn">↺ Réinitialiser</button>
+        </div>
       </form>
 
-      <div class="list">
-        <h3>DynLists</h3>
-        <table id="tblDyn" class="table">
-          <thead>
-            <tr>
-              <th>Nom</th><th>Chemin</th><th>Entrées</th><th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="list-section">
+        <h3>Dynlists du projet</h3>
+        <ul id="dynList" class="item-list">
+          <!-- lignes dynlist -->
+        </ul>
       </div>
     </section>
 
-    <!-- PREVIEW -->
-    <section id="tab-preview" class="panel">
-      <div class="preview-grid">
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>Fragment modèle – &lt;properties&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outProps">Copier</button>
-          </div>
-          <textarea id="outProps" rows="12" readonly></textarea>
-        </div>
-
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>Fragment modèle – &lt;associations&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outAssocs">Copier</button>
-          </div>
-          <textarea id="outAssocs" rows="12" readonly></textarea>
-        </div>
-
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>Fragment modèle – &lt;constraints&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outConstraints">Copier</button>
-          </div>
-          <textarea id="outConstraints" rows="12" readonly></textarea>
-        </div>
-
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>Share – &lt;show&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outShow">Copier</button>
-          </div>
-          <textarea id="outShow" rows="10" readonly></textarea>
-        </div>
-
-        <div class="preview-block">
-          <div class="block-head">
-            <h3>Share – &lt;field&gt;</h3>
-            <button class="btn btn-copy" data-copy="#outField">Copier</button>
-          </div>
-          <textarea id="outField" rows="14" readonly></textarea>
-        </div>
+    <!-- GÉNÉRATION -->
+    <section id="tab-generation" class="tabpanel" role="tabpanel" aria-labelledby="tabbtn-generation">
+      <div class="panel-header">
+        <h2>Génération</h2>
+        <p class="muted">Copie/colle les fragments ou télécharge les fichiers. Les conteneurs model sont optionnels.</p>
       </div>
 
-      <div class="export-actions">
-        <button id="btnBuild" class="btn btn-primary">Construire fragments</button>
-        <button id="btnDownloadZip" class="btn">Télécharger ZIP</button>
+      <div class="gen-sections">
+        <div class="gen-group">
+          <h3>Model — Constraints</h3>
+          <div class="gen-actions">
+            <button class="btn small" data-copy="#gen-model-constraints">📋 Copier</button>
+          </div>
+          <textarea id="gen-model-constraints" class="mono" rows="8" readonly></textarea>
+        </div>
+
+        <div class="gen-group">
+          <h3>Model — Properties</h3>
+          <div class="gen-actions">
+            <button class="btn small" data-copy="#gen-model-properties">📋 Copier</button>
+          </div>
+          <textarea id="gen-model-properties" class="mono" rows="10" readonly></textarea>
+        </div>
+
+        <div class="gen-group">
+          <h3>Model — Associations</h3>
+          <div class="gen-actions">
+            <button class="btn small" data-copy="#gen-model-associations">📋 Copier</button>
+          </div>
+          <textarea id="gen-model-associations" class="mono" rows="10" readonly></textarea>
+        </div>
+
+        <div class="gen-group">
+          <h3>Form — Fields</h3>
+          <div class="gen-actions">
+            <button class="btn small" data-copy="#gen-form-fields">📋 Copier</button>
+          </div>
+          <textarea id="gen-form-fields" class="mono" rows="12" readonly></textarea>
+        </div>
+
+        <div class="gen-group">
+          <h3>Form — Shows</h3>
+          <div class="gen-actions">
+            <button class="btn small" data-copy="#gen-form-shows">📋 Copier</button>
+          </div>
+          <textarea id="gen-form-shows" class="mono" rows="8" readonly></textarea>
+        </div>
+
+        <div class="gen-group">
+          <h3>Imports — CSV par dynlist</h3>
+          <div class="gen-actions">
+            <button class="btn small" id="downloadAllCsvBtn">⬇️ Télécharger tous</button>
+          </div>
+          <div id="gen-imports-list" class="download-list">
+            <!-- boutons de téléchargement unitaire générés ici -->
+          </div>
+        </div>
+
+        <div class="gen-footer-actions">
+          <button id="copyAllBtn" class="btn">📋 Tout copier</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPORT / IMPORT -->
+    <section id="tab-export" class="tabpanel" role="tabpanel" aria-labelledby="tabbtn-export">
+      <div class="panel-header">
+        <h2>Export / Import</h2>
+        <p class="muted">Exporter le projet (JSON) ou importer un projet existant. Sélection possible d’un CSV de contrainte unique.</p>
+      </div>
+
+      <div class="card stack">
+        <div class="grid two">
+          <div class="field">
+            <label>Exporter le projet (JSON)</label>
+            <button id="exportProjectBtn" class="btn">⬇️ Exporter JSON</button>
+          </div>
+          <div class="field">
+            <label for="importFile">Importer un projet (JSON)</label>
+            <input id="importFile" type="file" accept="application/json" />
+            <div id="importDrop" class="dropzone" aria-label="Glissez-déposez un fichier JSON ici">Glissez votre JSON ici</div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="field">
+            <label for="csvOneConstraint">Télécharger le CSV d’une contrainte spécifique</label>
+            <select id="csvOneConstraint">
+              <option value="">— sélectionner une dynlist —</option>
+            </select>
+          </div>
+          <div class="actions align-end">
+            <button id="downloadOneCsvBtn" class="btn">⬇️ Télécharger ce CSV</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PARAMÈTRES -->
+    <section id="tab-parametres" class="tabpanel" role="tabpanel" aria-labelledby="tabbtn-parametres">
+      <div class="panel-header">
+        <h2>Paramètres</h2>
+        <p class="muted">Préférences locales, thème, réinitialisation, version de schéma.</p>
+      </div>
+
+      <div class="card stack">
+        <div class="grid three">
+          <div class="field">
+            <label>Thème</label>
+            <div class="btn-group">
+              <button class="btn small" data-theme="light">Light Side</button>
+              <button class="btn small" data-theme="dark">Dark Side</button>
+              <button class="btn small" data-theme="auto">Auto</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="schemaVersion">Version de schéma</label>
+            <input id="schemaVersion" type="text" value="1" readonly />
+          </div>
+
+          <div class="field">
+            <label>Base locale</label>
+            <div class="btn-group">
+              <button id="resetDbBtn" class="btn small danger">🧨 Réinitialiser IndexedDB</button>
+              <button id="vacuumDbBtn" class="btn small">🧹 Nettoyer</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="app-footer">
-    <small>Made for Alfresco/beCPG · 100% client-side</small>
-  </footer>
+  <!-- Toasts / Notifications -->
+  <div id="toast" role="status" aria-live="polite"></div>
 
-  <script src="app.js"></script>
+  <!-- Templates invisibles (pour clonage dynamique) -->
+  <template id="tpl-item-row">
+    <li class="item-row">
+      <span class="item-label"></span>
+      <div class="row-actions">
+        <button type="button" class="btn xsmall edit">✏️</button>
+        <button type="button" class="btn xsmall danger del">🗑️</button>
+      </div>
+    </li>
+  </template>
+
+  <template id="tpl-hier-level">
+    <li class="level-row">
+      <div class="grid three">
+        <div class="field">
+          <label>Niveau</label>
+          <input type="number" class="hier-level" min="1" step="1" />
+        </div>
+        <div class="field">
+          <label>ID du champ</label>
+          <input type="text" class="hier-id" placeholder="projectHierarchy1" />
+          <small class="hint">L’ID complet sera <code>&lt;ns&gt;:ID</code>.</small>
+        </div>
+        <div class="field">
+          <label>Parent (ID précédent transformé)</label>
+          <input type="text" class="hier-parent" placeholder="jdi_projectHierarchy1" />
+          <small class="hint"><code>:</code> → <code>_</code> automatiquement.</small>
+        </div>
+      </div>
+      <button type="button" class="btn small danger level-del">✖ Supprimer ce niveau</button>
+    </li>
+  </template>
+
+  <script src="app.js" defer></script>
 </body>
 </html>
