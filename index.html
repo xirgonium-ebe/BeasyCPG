@@ -136,7 +136,11 @@
           <div class="grid three">
             <div class="field">
               <label for="propSet">Set</label>
-              <input id="propSet" type="text" placeholder="mainInfo" />
+              <!-- CHANGEMENT : input → select -->
+              <select id="propSet">
+                <!-- options injectées dynamiquement depuis l’onglet Projet -->
+              </select>
+              <small class="hint">Défaut : <code>mainInfo</code>.</small>
             </div>
             <div class="field inline">
               <label class="switch">
@@ -173,7 +177,11 @@
 
             <div class="field" data-conditional="propType=d:noderef">
               <label for="propAutocompleteDs">Autocomplete DS (nodeRef non hiérarchique)</label>
-              <input id="propAutocompleteDs" type="text" placeholder="becpg/autocomplete/linkedvalue/values/System/ProjectLists/bcpg:entityLists/tatooine_outpost" />
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input id="propAutocompleteDs" type="text" placeholder="becpg/autocomplete/linkedvalue/values/System/ProjectLists/bcpg:entityLists/tatooine_outpost" />
+                <!-- NOUVEAU : bouton valeur par défaut -->
+                <button type="button" id="btnFillPropAutocompleteDs" class="btn xsmall" title="Insérer la valeur par défaut">↩︎ Valeur par défaut</button>
+              </div>
               <small class="hint">Chemin de données — exemple : dépôt impérial sur <strong>Tatooine</strong>.</small>
             </div>
           </div>
@@ -189,26 +197,6 @@
           </div>
         </fieldset>
 
-        <fieldset class="stack">
-          <legend>Show</legend>
-          <div class="grid two">
-            <div class="field inline">
-              <label class="switch">
-                <input id="propShowForView" type="checkbox" />
-                <span class="slider"></span>
-              </label>
-              <div><strong>for-mode="view"</strong></div>
-            </div>
-            <div class="field inline">
-              <label class="switch">
-                <input id="propShowForce" type="checkbox" />
-                <span class="slider"></span>
-              </label>
-              <div><strong>force="true"</strong></div>
-            </div>
-          </div>
-        </fieldset>
-
         <fieldset class="stack" data-conditional="propType=d:noderef">
           <legend>Hiérarchie (d:noderef)</legend>
           <div class="grid two">
@@ -218,7 +206,11 @@
             </div>
             <div class="field">
               <label for="hierDs">Chemin DS</label>
-              <input id="hierDs" type="text" placeholder="becpg/autocomplete/linkedvalue/values/System/ProjectLists/bcpg:entityLists/project_Hierarchy" />
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input id="hierDs" type="text" placeholder="becpg/autocomplete/linkedvalue/values/System/ProjectLists/bcpg:entityLists/project_Hierarchy" />
+                <!-- NOUVEAU : bouton valeur par défaut -->
+                <button type="button" id="btnFillHierDs" class="btn xsmall" title="Insérer la valeur par défaut">↩︎ Valeur par défaut</button>
+              </div>
             </div>
           </div>
 
@@ -290,7 +282,11 @@
             </div>
             <div class="field">
               <label for="assocSet">Set (field)</label>
-              <input id="assocSet" type="text" placeholder="mainInfo" />
+              <!-- CHANGEMENT : input → select -->
+              <select id="assocSet">
+                <!-- options injectées dynamiquement depuis l’onglet Projet -->
+              </select>
+              <small class="hint">Défaut : <code>mainInfo</code>.</small>
             </div>
           </div>
         </fieldset>
@@ -304,12 +300,20 @@
             </div>
             <div class="field">
               <label for="assocPageLink">pageLinkTemplate (optionnel)</label>
-              <input id="assocPageLink" type="text" placeholder="entity-data-lists?list=View-properties&amp;nodeRef={nodeRef}" />
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input id="assocPageLink" type="text" placeholder="entity-data-lists?list=View-properties&amp;nodeRef={nodeRef}" />
+                <!-- NOUVEAU : bouton valeur par défaut -->
+                <button type="button" id="btnFillAssocPageLink" class="btn xsmall" title="Insérer la valeur par défaut">↩︎ Valeur par défaut</button>
+              </div>
             </div>
           </div>
           <div class="field">
             <label for="assocDs">Autocomplete association DS</label>
-            <input id="assocDs" type="text" placeholder="becpg/autocomplete/targetassoc/associations/jdi:project?classNames=jdi:project,bcpg:entityTplAspect&amp;excludeProps=bcpg:entityTplEnabled%7Cfalse" />
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input id="assocDs" type="text" placeholder="becpg/autocomplete/targetassoc/associations/jdi:project?classNames=jdi:project,bcpg:entityTplAspect&amp;excludeProps=bcpg:entityTplEnabled%7Cfalse" />
+              <!-- NOUVEAU : bouton valeur par défaut -->
+              <button type="button" id="btnFillAssocDs" class="btn xsmall" title="Insérer la valeur par défaut">↩︎ Valeur par défaut</button>
+            </div>
           </div>
         </fieldset>
 
@@ -346,7 +350,11 @@
           </div>
           <div class="field">
             <label for="dynPath">Chemin</label>
-            <input id="dynPath" type="text" placeholder="/System/Lists/bcpg:entityLists/rebellion_ranks" />
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input id="dynPath" type="text" placeholder="/System/Lists/bcpg:entityLists/rebellion_ranks" />
+              <!-- NOUVEAU : bouton valeur par défaut -->
+              <button type="button" id="btnFillDynPath" class="btn xsmall" title="Insérer la valeur par défaut">↩︎ Valeur par défaut</button>
+            </div>
             <small class="hint">Par défaut : <code>/System/Lists/bcpg:entityLists/&lt;list_name&gt;</code></small>
           </div>
         </div>

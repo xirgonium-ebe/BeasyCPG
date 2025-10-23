@@ -55,9 +55,6 @@
   }
 
   function normalizeCsvSeparatorToSemicolon(text) {
-    // Force le séparateur ';' (remplace les virgules délimitrices si elles existent)
-    // Stratégie simple: si lignes 'VALUES' contiennent ",", on remplace ',' par ';' hors guillemets.
-    // Pour le collage rapide utilisateur on fait un remplacement global sur lignes de données.
     return text.replace(/,/g, ";");
   }
 
@@ -224,7 +221,6 @@
       await DB.put(STORE_SETTINGS, { key, value });
     },
     getSync(key) {
-      // Non bloquant : on ne lit pas sync depuis IDB. Ce helper est juste un alias.
       return null;
     },
     async get(key) {
@@ -264,12 +260,41 @@
     });
   }
 
+  function setSelectOptions(selectEl, values, selectedValue) {
+    if (!selectEl) return;
+    const uniq = Array.from(new Set(values && values.length ? values : ["mainInfo"]));
+    if (!uniq.includes("mainInfo")) uniq.unshift("mainInfo");
+    const prev = selectedValue ?? selectEl.value;
+    selectEl.innerHTML = "";
+    uniq.forEach((v) => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      selectEl.appendChild(opt);
+    });
+    if (prev && uniq.includes(prev)) {
+      selectEl.value = prev;
+    } else {
+      selectEl.value = "mainInfo";
+    }
+  }
+
+  function refreshSetSelects() {
+    const sets = currentProject?.sets || ["mainInfo"];
+    setSelectOptions($("#propSet"), sets);
+    setSelectOptions($("#assocSet"), sets);
+  }
+
   function loadProjectIntoForm() {
     if (!currentProject) return;
     $("#projectName").value = currentProject.name || "";
     $("#projectNamespace").value = currentProject.namespace || "jdi";
     $("#projectSets").value = (currentProject.sets || []).join(", ");
     $("#toggleContainers").checked = !!currentProject.options?.includeContainers;
+
+    // NEW: alimente les sélecteurs Set
+    refreshSetSelects();
+
     // dynlist dropdown pour export unitaire
     refreshDynlistSelects();
     renderPropList();
@@ -290,16 +315,14 @@
    ***********************/
   function updatePropConditional() {
     const type = $("#propType").value;
-    // Show/hide data-conditional blocks
     $$("[data-conditional]").forEach((el) => {
-      const cond = el.getAttribute("data-conditional"); // ex: "propType=d:text"
+      const cond = el.getAttribute("data-conditional");
       const [k, v] = cond.split("=");
       if (k === "propType") {
         el.style.display = type === v ? "" : "none";
       }
     });
 
-    // Fieldset Hiérarchie (d:noderef)
     const hierFieldset = $('fieldset.stack[data-conditional="propType=d:noderef"]');
     if (hierFieldset) hierFieldset.style.display = type === "d:noderef" ? "" : "none";
   }
@@ -320,6 +343,7 @@
       await DB.put(STORE_PROJECTS, currentProject);
       Toast.show("Projet sauvegardé ✅", "info");
       refreshProjectPicker();
+      refreshSetSelects(); // NEW
       generateAll();
     });
 
@@ -360,6 +384,7 @@
         const setsStr = $("#projectSets").value.trim();
         currentProject.sets = setsStr ? setsStr.split(",").map((s) => s.trim()).filter(Boolean) : ["mainInfo"];
         currentProject.options.includeContainers = $("#toggleContainers").checked;
+        refreshSetSelects(); // NEW
         autoSave();
         generateAll();
       });
@@ -374,7 +399,7 @@
     const title = $("#propTitle").value.trim();
     const type = $("#propType").value;
     const mandatoryModel = $("#propMandatoryModel").checked;
-    const set = $("#propSet").value.trim() || "mainInfo";
+    const set = $("#propSet").value || "mainInfo";
     const mandatoryField = $("#propMandatoryField").checked;
     const readOnly = $("#propReadOnly").checked;
     const helpId = $("#propHelpId").value.trim();
@@ -384,7 +409,6 @@
     const showForView = $("#propShowForView").checked;
     const showForce = $("#propShowForce").checked;
 
-    // Hiérarchie si d:noderef
     let hierarchy = null;
     if (type === "d:noderef") {
       const hierName = $("#hierName").value.trim();
@@ -412,6 +436,19 @@
     };
   }
 
+  function setSelectValueOrAppend(selectEl, value) {
+    if (!selectEl) return;
+    if (!value) return;
+    const exists = Array.from(selectEl.options).some((o) => o.value === value);
+    if (!exists) {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = value;
+      selectEl.appendChild(opt);
+    }
+    selectEl.value = value;
+  }
+
   function renderPropList() {
     const ul = $("#propList");
     ul.innerHTML = "";
@@ -421,12 +458,15 @@
       $(".item-label", li).textContent = `${p.tech} — ${p.type}`;
       const row = li.querySelector("li");
       $(".edit", row).addEventListener("click", () => {
-        // Charger dans le formulaire
         $("#propTechName").value = p.tech;
         $("#propTitle").value = p.title || "";
         $("#propType").value = p.type;
         $("#propMandatoryModel").checked = !!p.general?.mandatoryModel;
-        $("#propSet").value = p.field?.set || "mainInfo";
+
+        // Assure que le select Set contient la valeur
+        refreshSetSelects();
+        setSelectValueOrAppend($("#propSet"), p.field?.set || "mainInfo");
+
         $("#propMandatoryField").checked = !!p.field?.mandatoryField;
         $("#propReadOnly").checked = !!p.field?.readOnly;
         $("#propHelpId").value = p.field?.helpId || "";
@@ -437,7 +477,6 @@
         $("#propShowForView").checked = !!p.show?.forView;
         $("#propShowForce").checked = !!p.show?.force;
 
-        // Hiérarchie
         $("#propType").dispatchEvent(new Event("change"));
         if (p.type === "d:noderef") {
           $("#hierName").value = p.hierarchy?.name || "";
@@ -466,11 +505,14 @@
 
     $("#addHierLevelBtn").addEventListener("click", () => addHierarchyLevelRow());
 
+    // NEW — boutons "Valeur par défaut"
+    $("#btnFillPropAutocompleteDs")?.addEventListener("click", () => fillDefaultFromPlaceholder("#propAutocompleteDs"));
+    $("#btnFillHierDs")?.addEventListener("click", () => fillDefaultFromPlaceholder("#hierDs"));
+
     $("#addPropBtn").addEventListener("click", () => {
       if (!currentProject) currentProject = emptyProject();
       const obj = propFormToObject();
       if (!obj.tech) return Toast.show("Nom technique requis", "warn");
-      // Unicité sur tech
       const existsIdx = currentProject.props.findIndex((x) => x.tech === obj.tech);
       if (existsIdx >= 0) currentProject.props[existsIdx] = obj;
       else currentProject.props.push(obj);
@@ -506,7 +548,7 @@
     const targetClass = $("#assocTargetClass").value.trim();
     const sourceMany = $("#assocSourceMany").checked;
     const targetMany = $("#assocTargetMany").checked;
-    const set = $("#assocSet").value.trim() || "mainInfo";
+    const set = $("#assocSet").value || "mainInfo";
     const helpId = $("#assocHelpId").value.trim();
     const pageLinkTemplate = $("#assocPageLink").value.trim();
     const ds = $("#assocDs").value.trim();
@@ -534,7 +576,10 @@
         $("#assocTargetClass").value = a.targetClass || "";
         $("#assocSourceMany").checked = !!a.sourceMany;
         $("#assocTargetMany").checked = !!a.targetMany;
-        $("#assocSet").value = a.field?.set || "mainInfo";
+
+        refreshSetSelects();
+        setSelectValueOrAppend($("#assocSet"), a.field?.set || "mainInfo");
+
         $("#assocHelpId").value = a.field?.helpId || "";
         $("#assocPageLink").value = a.field?.pageLinkTemplate || "";
         $("#assocDs").value = a.field?.ds || "";
@@ -551,6 +596,10 @@
   }
 
   function initAssocForm() {
+    // NEW — boutons "Valeur par défaut"
+    $("#btnFillAssocPageLink")?.addEventListener("click", () => fillDefaultFromPlaceholder("#assocPageLink"));
+    $("#btnFillAssocDs")?.addEventListener("click", () => fillDefaultFromPlaceholder("#assocDs"));
+
     $("#addAssocBtn").addEventListener("click", () => {
       if (!currentProject) currentProject = emptyProject();
       const obj = assocFormToObject();
@@ -616,7 +665,6 @@
         $("#dynPath").value = d.path || "";
         $("#dynAddEmpty").checked = !!d.addEmptyValue;
         $("#dynConstraintName").value = d.constraintName || "";
-        // Table editor
         const editor = $("#dynForm .table-editor");
         editor.innerHTML = "";
         (d.items || []).forEach((it) => addDynEditorRow(it.code, it.value));
@@ -652,22 +700,32 @@
     $("#dynAddRowBtn").addEventListener("click", () => addDynEditorRow());
 
     $("#dynCsvPaste").addEventListener("paste", (e) => {
-      // Convertit ',' en ';' si l'utilisateur colle un CSV
       setTimeout(() => {
         const ta = e.target;
         ta.value = normalizeCsvSeparatorToSemicolon(ta.value);
-        // Parse simple
         const lines = ta.value.split(/\r?\n/).filter((l) => l.trim());
         const editor = $("#dynForm .table-editor");
         editor.innerHTML = "";
         lines.forEach((line) => {
-          if (line.trim().startsWith("#")) return; // ignore header comment
+          if (line.trim().startsWith("#")) return;
           const parts = line.split(";");
           if (parts.length >= 2) {
             addDynEditorRow(parts[0].trim(), parts[1].trim());
           }
         });
       }, 0);
+    });
+
+    // NEW — bouton "Valeur par défaut" avec logique spéciale
+    $("#btnFillDynPath")?.addEventListener("click", () => {
+      const tech = $("#dynTechName").value.trim();
+      const input = $("#dynPath");
+      const current = input.value.trim();
+      if (tech && !current) {
+        input.value = `/System/Lists/bcpg:entityLists/${tech}`;
+      } else {
+        fillDefaultFromPlaceholder("#dynPath");
+      }
     });
 
     $("#addDynBtn").addEventListener("click", () => {
@@ -687,7 +745,6 @@
   }
 
   function refreshDynlistSelects() {
-    // Propriétés → contraintes dynlist
     const sel = $("#propDynlistSelect");
     if (sel) {
       sel.innerHTML = `<option value="">— aucune —</option>`;
@@ -698,7 +755,6 @@
         sel.appendChild(opt);
       });
     }
-    // Export → une contrainte
     const sel2 = $("#csvOneConstraint");
     if (sel2) {
       sel2.innerHTML = `<option value="">— sélectionner une dynlist —</option>`;
@@ -709,7 +765,6 @@
         sel2.appendChild(opt);
       });
     }
-    // Génération → liste des CSV unitaires
     const cont = $("#gen-imports-list");
     if (cont) {
       cont.innerHTML = "";
@@ -777,9 +832,7 @@
     if (!currentProject) return "";
     const items = (currentProject.props || []).map((p) => {
       const name = nsId(p.tech);
-      // Mandatory (model) → balise dédiée dans la propriété
       const mandatory = p.general?.mandatoryModel ? `\n\t\t\t<mandatory>true</mandatory>` : "";
-      // Constraint (dynlist) uniquement si d:text et dynlist sélectionnée
       let constraint = "";
       if (p.type === "d:text" && p.field?.dynlistId) {
         const dl = (currentProject.dynlists || []).find((d) => d.techName === p.field.dynlistId);
@@ -848,14 +901,12 @@
           `\t\t</control>`,
         ].join("\n");
       } else if (p.type === "d:noderef" && p.hierarchy) {
-        // Hiérarchie multi-niveaux : on ne met rien ici (les champs hiérarchiques se génèrent séparément)
         return null;
       }
 
       return `\t<field id="${id}"${help}${attrs.length ? " " + attrs.join(" ") : ""}>${inner ? "\n" + inner + "\n\t" : ""}</field>`;
     }).filter(Boolean);
 
-    // Champs hiérarchiques (d:noderef)
     const hierFields = [];
     (currentProject.props || [])
       .filter((p) => p.type === "d:noderef" && p.hierarchy)
@@ -871,7 +922,6 @@
             `\t\t\t<control-param name="ds">${ds}</control-param>`,
           ];
           if (i > 0) {
-            // parent = ns + '_' + previousId (remplacement ':' -> '_')
             const prev = levels[i - 1].id;
             const parentRef = `${ns}_${prev.replace(/:/g, "_")}`;
             inner.push(`\t\t\t<control-param name="parent">${parentRef}</control-param>`);
@@ -881,7 +931,6 @@
         });
       });
 
-    // Associations → field autocomplete-association
     const assocFields = (currentProject.assocs || []).map((a) => {
       const id = nsId(a.tech);
       const help = a.field?.helpId ? ` help-id="${escapeXml(a.field.helpId)}"` : "";
@@ -935,7 +984,6 @@
       importProjectFromJSON(text);
     });
 
-    // Drag & drop
     const drop = $("#importDrop");
     drop.addEventListener("dragover", (e) => {
       e.preventDefault();
@@ -980,7 +1028,6 @@
   }
 
   function downloadCsvForList(d) {
-    // Un seul fichier CSV, ordre exact demandé
     const sep = ";";
     const lines = [];
     lines.push(`PATH${sep}${d.path}`);
@@ -988,7 +1035,7 @@
     lines.push(`TYPE${sep}dl:dataList`);
     lines.push(`COLUMNS${sep}cm:name${sep}cm:title${sep}dl:dataListItemType`);
     lines.push(`VALUES${sep}${lastPathPart(d.path)}${sep}${d.displayName || ""}${sep}bcpg:listValue`);
-    lines.push(""); // blank line
+    lines.push("");
     lines.push(`MAPPING${sep}Default`);
     lines.push(`TYPE${sep}bcpg:listValue`);
     lines.push(`PATH${sep}${d.path}`);
@@ -1014,14 +1061,12 @@
    * COPIES — Génération
    ***********************/
   function initGenerationActions() {
-    // Boutons Copier individuels (data-copy)
     $$("#tab-generation [data-copy]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const sel = btn.getAttribute("data-copy");
         copyFrom(sel);
       });
     });
-    // Tout copier
     $("#copyAllBtn").addEventListener("click", async () => {
       const t1 = $("#gen-model-constraints").value;
       const t2 = $("#gen-model-properties").value;
@@ -1044,12 +1089,10 @@
         "<!-- form: shows -->",
         t5,
       ].join("\n");
-      // Copie via clipboard API si dispo
       try {
         await navigator.clipboard.writeText(all);
         Toast.show("Toutes les sections copiées ✅");
       } catch {
-        // fallback
         const ta = document.createElement("textarea");
         ta.value = all;
         document.body.appendChild(ta);
@@ -1078,7 +1121,6 @@
     });
 
     $("#vacuumDbBtn").addEventListener("click", async () => {
-      // Nettoyage simple: retirer props/assocs/dynlists vides
       if (!currentProject) return;
       currentProject.props = (currentProject.props || []).filter((p) => p && p.tech);
       currentProject.assocs = (currentProject.assocs || []).filter((a) => a && a.tech);
@@ -1090,6 +1132,17 @@
       renderAssocList();
       renderDynList();
     });
+  }
+
+  /***********************
+   * Helpers — default fill
+   ***********************/
+  function fillDefaultFromPlaceholder(selector) {
+    const el = $(selector);
+    if (!el) return;
+    const ph = el.getAttribute("placeholder") || "";
+    el.value = ph;
+    el.dispatchEvent(new Event("input"));
   }
 
   /***********************
@@ -1118,28 +1171,14 @@
     Theme.init();
     initTabs();
 
-    // Projet
     initProjectForm();
-
-    // Propriétés
     initPropForm();
-
-    // Associations
     initAssocForm();
-
-    // Dynlists
     initDynForm();
-
-    // Génération
     initGenerationActions();
-
-    // Export / Import
     initExportImport();
-
-    // Paramètres
     initParams();
 
-    // First load: charger dernier projet si existe, sinon vierge
     const all = await DB.getAll(STORE_PROJECTS);
     if (all.length) {
       currentProject = all[all.length - 1];
@@ -1150,7 +1189,6 @@
     loadProjectIntoForm();
     refreshProjectPicker();
 
-    // Copier boutons en dehors de Génération (header)
     $$("#tab-generation [data-copy]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const sel = btn.getAttribute("data-copy");
