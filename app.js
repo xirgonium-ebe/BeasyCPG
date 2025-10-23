@@ -885,7 +885,7 @@
       if (p.field?.mandatoryField) attrs.push(`mandatory="true"`);
       if (p.field?.readOnly) attrs.push(`read-only="true"`);
       attrs.push(`set="${escapeXml(sets(p.field?.set))}"`);
-      const help = p.field?.helpId ? ` help-id="${escapeXml(p.field.helpId)}"` : "";
+      const help = p.field?.helpId ? ` help="${escapeXml(p.field.helpId)}"` : "";
       let inner = "";
 
       if (p.type === "d:text" && p.field?.textareaRows) {

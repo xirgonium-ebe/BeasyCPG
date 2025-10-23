@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Holocron — Générateur de balises Alfresco (Star Wars)</title>
+  <title>Holocron — Générateur de balises </title>
   <meta name="description" content="Générer des balises Alfresco (model/form) et fichiers d’import dynlists. Thème Star Wars. IndexedDB.">
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -12,8 +12,8 @@
   <header class="app-header" role="banner">
     <div class="header-left">
       <div class="logo" aria-hidden="true">🛰️</div>
-      <h1 class="app-title">Holocron — Générateur de balises Alfresco</h1>
-      <span class="subtitle">Jedi vs Sith • Classic Trilogy UI</span>
+      <h1 class="app-title">Holocron — Générateur de balises</h1>
+      <span class="subtitle">Parceque notre PLM le vaut bien</span>
     </div>
     <div class="header-right">
       <button id="themeToggle" class="icon-btn" title="Basculer clair/sombre" aria-pressed="false" aria-label="Basculer le thème">
@@ -108,12 +108,11 @@
                 <option>d:text</option>
                 <option>d:mltext</option>
                 <option>d:int</option>
-                <option>d:long</option>
+<!--                <option>d:long</option>-->
                 <option>d:double</option>
                 <option>d:boolean</option>
                 <option>d:date</option>
                 <option>d:datetime</option>
-                <option>d:qname</option>
                 <option>d:noderef</option>
               </select>
             </div>
@@ -148,7 +147,7 @@
                 <span class="slider"></span>
               </label>
               <div>
-                <strong>mandatory="true"</strong><br/>
+                <strong>mandatory (form)</strong><br/>
                 <small class="muted">Obligation côté field.</small>
               </div>
             </div>
@@ -158,15 +157,16 @@
                 <span class="slider"></span>
               </label>
               <div>
-                <strong>read-only="true"</strong>
+                <strong>Read only (form)</strong>
+                <small class="muted">Lecture seule</small>
               </div>
             </div>
           </div>
 
           <div class="grid three">
             <div class="field">
-              <label for="propHelpId">help-id (optionnel)</label>
-              <input id="propHelpId" type="text" placeholder="becpg.forms.help.projectHierarchy2" />
+              <label for="propHelpId">Help</label>
+              <input id="propHelpId" type="text" placeholder="Help content" />
             </div>
 
             <div class="field" data-conditional="propType=d:text">
