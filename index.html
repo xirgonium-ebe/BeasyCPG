@@ -109,16 +109,55 @@
 			<form id="propForm" class="card stack">
 				<fieldset class="stack">
 					<legend>Général</legend>
+					<!--					<div class="grid three">-->
+					<!--						<div class="field">-->
+					<!--							<label for="propTechName">Nom technique</label>-->
+					<!--							<input id="propTechName" type="text" placeholder="projectHierarchy1"-->
+					<!--								pattern="[a-zA-Z][\w\-]*" required />-->
+					<!--						</div>-->
+					<!--						<div class="field">-->
+					<!--							<label for="propTitle">Libellé</label>-->
+					<!--							<input id="propTitle" type="text" placeholder="Hiérarchie Projet (Niveau 1)" />-->
+					<!--						</div>-->
+					<!--						<div class="field">-->
+					<!--							<label for="propType">Type de données</label>-->
+					<!--							<select id="propType" required>-->
+					<!--								<option value="">— sélectionner —</option>-->
+					<!--								<option>d:text</option>-->
+					<!--								<option>d:mltext</option>-->
+					<!--								<option>d:int</option>-->
+					<!--								                <option>d:long</option>-->
+					<!--								<option>d:double</option>-->
+					<!--								<option>d:boolean</option>-->
+					<!--								<option>d:date</option>-->
+					<!--								<option>d:datetime</option>-->
+					<!--								<option>d:noderef</option>-->
+					<!--							</select>-->
+					<!--						</div>-->
+					<!--					</div>-->
+
 					<div class="grid three">
+						<div class="field">
+							<label for="propTitle">Libellé</label>
+							<input id="propTitle" type="text" placeholder="Libellé de ma propriété" />
+						</div>
+
+						<div class="field align-end">
+							<label>&nbsp;</label>
+							<button type="button" id="btnSuggestPropTech" class="btn small">
+								Générer le nom technique
+							</button>
+						</div>
+
 						<div class="field">
 							<label for="propTechName">Nom technique</label>
 							<input id="propTechName" type="text" placeholder="projectHierarchy1"
 								pattern="[a-zA-Z][\w\-]*" required />
 						</div>
-						<div class="field">
-							<label for="propTitle">Libellé</label>
-							<input id="propTitle" type="text" placeholder="Hiérarchie Projet (Niveau 1)" />
-						</div>
+					</div>
+
+					<!-- Type de données séparé pour garder une grille propre -->
+					<div class="grid three">
 						<div class="field">
 							<label for="propType">Type de données</label>
 							<select id="propType" required>
@@ -126,7 +165,6 @@
 								<option>d:text</option>
 								<option>d:mltext</option>
 								<option>d:int</option>
-								<!--                <option>d:long</option>-->
 								<option>d:double</option>
 								<option>d:boolean</option>
 								<option>d:date</option>
@@ -135,6 +173,7 @@
 							</select>
 						</div>
 					</div>
+
 
 					<div class="field inline">
 						<label class="switch">
@@ -174,7 +213,7 @@
 						</div>
 					</div>
 				</fieldset>
-   
+
 
 				<fieldset class="stack">
 					<legend>Field</legend>
@@ -303,22 +342,52 @@
 			<form id="assocForm" class="card stack">
 				<fieldset class="stack">
 					<legend>Général</legend>
+					<!--					<div class="grid three">-->
+					<!--						<div class="field">-->
+					<!--							<label for="assocTechName">Nom technique</label>-->
+					<!--							<input id="assocTechName" type="text" placeholder="currentMRDRCodeOfSKU"-->
+					<!--								pattern="[a-zA-Z][\w\-]*" required />-->
+					<!--						</div>-->
+					<!--						<div class="field">-->
+					<!--							<label for="assocTitle">Libellé</label>-->
+					<!--							<input id="assocTitle" type="text"-->
+					<!--								placeholder="Current MRDR Code of SKU (NA for Innovation)" />-->
+					<!--						</div>-->
+					<!--						<div class="field">-->
+					<!--							<label for="assocTargetClass">Class cible</label>-->
+					<!--							<input id="assocTargetClass" type="text" placeholder="bcpg:product" />-->
+					<!--						</div>-->
+					<!--					</div>-->
+
 					<div class="grid three">
-						<div class="field">
-							<label for="assocTechName">Nom technique</label>
-							<input id="assocTechName" type="text" placeholder="currentMRDRCodeOfSKU"
-								pattern="[a-zA-Z][\w\-]*" required />
-						</div>
 						<div class="field">
 							<label for="assocTitle">Libellé</label>
 							<input id="assocTitle" type="text"
 								placeholder="Current MRDR Code of SKU (NA for Innovation)" />
 						</div>
+
+						<div class="field align-end">
+							<label>&nbsp;</label>
+							<button type="button" id="btnSuggestAssocTech" class="btn small">
+								Générer le nom technique
+							</button>
+						</div>
+
+						<div class="field">
+							<label for="assocTechName">Nom technique</label>
+							<input id="assocTechName" type="text" placeholder="currentMRDRCodeOfSKU"
+								pattern="[a-zA-Z][\w\-]*" required />
+						</div>
+					</div>
+
+					<!-- On met la classe cible juste en dessous -->
+					<div class="grid three">
 						<div class="field">
 							<label for="assocTargetClass">Class cible</label>
 							<input id="assocTargetClass" type="text" placeholder="bcpg:product" />
 						</div>
 					</div>
+
 
 					<div class="grid three">
 						<div class="field inline">

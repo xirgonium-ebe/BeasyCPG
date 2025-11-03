@@ -327,6 +327,29 @@
 		if (hierFieldset) hierFieldset.style.display = type === "d:noderef" ? "" : "none";
 	}
 
+	// ——— Suggestion de nom technique à partir d’un libellé ———
+	function stripDiacritics(s) {
+		return (s || "")
+			.normalize("NFD")
+			.replace(/[\u0300-\u036f]/g, "");
+	}
+	function toLowerCamelFromLabel(label) {
+		if (!label) return "";
+		// Remplace tout ce qui n'est pas lettre/numéro par un séparateur
+		const cleaned = stripDiacritics(label).replace(/[^a-zA-Z0-9]+/g, " ").trim();
+		if (!cleaned) return "";
+		const parts = cleaned.split(/\s+/);
+		const first = parts[0].toLowerCase();
+		const rest = parts.slice(1).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+		let out = [first, ...rest].join("");
+		// Si ça commence par un chiffre, préfixer d'une lettre
+		if (/^[0-9]/.test(out)) out = "x" + out;
+		// Garde uniquement [a-zA-Z0-9_ -] pour respecter le pattern autorisé
+		out = out.replace(/[^\w\-]/g, "");
+		return out;
+	}
+
+
 	/***********************
 	 * PROJET — handlers
 	 ***********************/
@@ -500,6 +523,17 @@
 	}
 
 	function initPropForm() {
+
+		// Bouton: générer nom technique depuis le libellé
+		$("#btnSuggestPropTech")?.addEventListener("click", () => {
+			const label = $("#propTitle").value.trim();
+			const suggestion = toLowerCamelFromLabel(label);
+			if (!suggestion) return Toast.show("Libellé vide ou invalide", "warn");
+			$("#propTechName").value = suggestion;
+			Toast.show(`Nom technique proposé: ${suggestion}`);
+		});
+
+
 		$("#propType").addEventListener("change", updatePropConditional);
 		updatePropConditional();
 
@@ -599,6 +633,16 @@
 		// NEW — boutons "Valeur par défaut"
 		$("#btnFillAssocPageLink")?.addEventListener("click", () => fillDefaultFromPlaceholder("#assocPageLink"));
 		$("#btnFillAssocDs")?.addEventListener("click", () => fillDefaultFromPlaceholder("#assocDs"));
+
+		// Bouton: générer nom technique depuis le libellé (pour les assocs)
+		$("#btnSuggestAssocTech")?.addEventListener("click", () => {
+			const label = $("#assocTitle").value.trim();
+			const suggestion = toLowerCamelFromLabel(label);
+			if (!suggestion) return Toast.show("Libellé vide ou invalide", "warn");
+			$("#assocTechName").value = suggestion;
+			Toast.show(`Nom technique proposé: ${suggestion}`);
+		});
+
 
 		$("#addAssocBtn").addEventListener("click", () => {
 			if (!currentProject) currentProject = emptyProject();
