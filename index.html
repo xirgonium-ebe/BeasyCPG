@@ -116,7 +116,7 @@
 								pattern="[a-zA-Z][\w\-]*" required />
 						</div>
 						<div class="field">
-							<label for="propTitle">Nom classique (title)</label>
+							<label for="propTitle">Libellé</label>
 							<input id="propTitle" type="text" placeholder="Hiérarchie Projet (Niveau 1)" />
 						</div>
 						<div class="field">
@@ -310,7 +310,7 @@
 								pattern="[a-zA-Z][\w\-]*" required />
 						</div>
 						<div class="field">
-							<label for="assocTitle">Nom classique (title)</label>
+							<label for="assocTitle">Libellé</label>
 							<input id="assocTitle" type="text"
 								placeholder="Current MRDR Code of SKU (NA for Innovation)" />
 						</div>
@@ -393,7 +393,7 @@
 		<!-- DYNLISTS -->
 		<section id="tab-dynlists" class="tabpanel" role="tabpanel" aria-labelledby="tabbtn-dynlists">
 			<div class="panel-header">
-				<h2>Dynlists</h2>
+				<h2>Listes de valeurs</h2>
 				<p class="muted">Créer/éditer une liste de valeurs. Le CSV exporté est unique par liste et forcé au
 					séparateur <code>;</code>.</p>
 			</div>
@@ -405,7 +405,7 @@
 						<input id="dynTechName" type="text" placeholder="rebellion_ranks" pattern="[\w\-]+" required />
 					</div>
 					<div class="field">
-						<label for="dynDisplayName">Nom commun</label>
+						<label for="dynDisplayName">Nom de la liste</label>
 						<input id="dynDisplayName" type="text" placeholder="Grades de l’Alliance" />
 					</div>
 					<div class="field">
@@ -529,7 +529,7 @@
 
 
 				<div class="gen-group">
-					<h3>Imports — CSV par dynlist</h3>
+					<h3>Imports — CSV par liste de valeurs</h3>
 					<div class="gen-actions">
 						<button class="btn small" id="downloadAllCsvBtn">⬇️ Télécharger tous</button>
 					</div>
@@ -549,7 +549,7 @@
 			<div class="panel-header">
 				<h2>Export / Import</h2>
 				<p class="muted">Exporter le projet (JSON) ou importer un projet existant. Sélection possible d’un CSV
-					de contrainte unique.</p>
+					de contrainte.</p>
 			</div>
 
 			<div class="card stack">
