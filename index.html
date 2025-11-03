@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<title>Holocron — Générateur de balises </title>
 	<meta name="description"
-		content="Générer des balises Alfresco (model/form) et fichiers d’import dynlists. Thème Star Wars. IndexedDB.">
+		content="Générer des balises et fichiers d’import de Listes de valeurs. Thème Star Wars. IndexedDB.">
 	<link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -19,7 +19,7 @@
 			<span class="subtitle">Parceque notre PLM le vaut bien</span>
 		</div>
 		<div class="header-right">
-			<button id="themeToggle" class="icon-btn" title="Basculer clair/sombre" aria-pressed="false"
+			<button id="themeToggle" class="icon-btn" title="Coté obscure / Coté lumière" aria-pressed="false"
 				aria-label="Basculer le thème">
 				<span class="icon-sun" aria-hidden="true">🌞</span>
 				<span class="icon-moon" aria-hidden="true">🌒</span>
@@ -30,15 +30,15 @@
 	<!-- Tabs Navigation -->
 	<nav class="tabs" role="tablist" aria-label="Navigation principale">
 		<button class="tab active" role="tab" aria-selected="true" aria-controls="tab-projet" id="tabbtn-projet"
-			data-tab="projet">Projet</button>
-		<button class="tab" role="tab" aria-selected="false" aria-controls="tab-proprietes" id="tabbtn-proprietes"
-			data-tab="proprietes">Propriétés</button>
-		<button class="tab" role="tab" aria-selected="false" aria-controls="tab-associations" id="tabbtn-associations"
-			data-tab="associations">Associations</button>
+			data-tab="projet">Step 1 - Projet</button>
 		<button class="tab" role="tab" aria-selected="false" aria-controls="tab-dynlists" id="tabbtn-dynlists"
-			data-tab="dynlists">Dynlists</button>
+			data-tab="dynlists">Step 2 - Listes de valeurs</button>
+		<button class="tab" role="tab" aria-selected="false" aria-controls="tab-proprietes" id="tabbtn-proprietes"
+			data-tab="proprietes">Step 3 - Propriétés</button>
+		<button class="tab" role="tab" aria-selected="false" aria-controls="tab-associations" id="tabbtn-associations"
+			data-tab="associations">Step 4 - Associations</button>
 		<button class="tab" role="tab" aria-selected="false" aria-controls="tab-generation" id="tabbtn-generation"
-			data-tab="generation">Génération</button>
+			data-tab="generation">Step 5 - Génération</button>
 		<button class="tab" role="tab" aria-selected="false" aria-controls="tab-export" id="tabbtn-export"
 			data-tab="export">Export / Import</button>
 		<button class="tab" role="tab" aria-selected="false" aria-controls="tab-parametres" id="tabbtn-parametres"
@@ -174,7 +174,7 @@
 						</div>
 					</div>
 				</fieldset>
-
+   
 
 				<fieldset class="stack">
 					<legend>Field</legend>
