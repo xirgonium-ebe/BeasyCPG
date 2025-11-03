@@ -55,8 +55,11 @@
 	}
 
 	function normalizeCsvSeparatorToSemicolon(text) {
-		return text.replace(/,/g, ";");
+		return text
+			.replace(/\t/g, ";")   // gère le collage Excel (tabs)
+			.replace(/,/g, ";");   // garde la compatibilité CSV “, ”
 	}
+
 
 	/***********************
 	 * Gestion des onglets
