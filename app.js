@@ -420,14 +420,14 @@
 	/***********************
 	 * PROPRIÉTÉS — CRUD
 	 ***********************/
-	function updateMultipleAvailability() {
-		const hasDynlist = ($("#propDynlistSelect").value || "").trim() !== "";
-		const chk = $("#propMultiple");
-		chk.disabled = !hasDynlist;
-	}
-
-	$("#propDynlistSelect")?.addEventListener("change", updateMultipleAvailability);
-	document.addEventListener("DOMContentLoaded", updateMultipleAvailability);
+//	function updateMultipleAvailability() {
+//		const hasDynlist = ($("#propDynlistSelect").value || "").trim() !== "";
+//		const chk = $("#propMultiple");
+//		chk.disabled = !hasDynlist;
+//	}
+//
+//	$("#propDynlistSelect")?.addEventListener("change", updateMultipleAvailability);
+//	document.addEventListener("DOMContentLoaded", updateMultipleAvailability);
 
 
 
@@ -903,12 +903,11 @@
 			}
 
 			// NEW — multiple uniquement si une contrainte est présente
-			const multiple = p.general?.multiple && hasConstraint ? `\n\t\t\t<multiple>true</multiple>` : "";
+			//const multiple = p.general?.multiple && hasConstraint ? `\n\t\t\t<multiple>true</multiple>` : "";
+			//return `\t<property name="${name}">\n\t\t<title>${escapeXml(p.title || p.tech)}</title>\n\t\t<type>${p.type}</type>${multiple}${mandatory}${constraint}\n\t</property>`;
 
-			return `\t<property name="${name}">\n\t\t<title>${escapeXml(p.title || p.tech)}</title>\n\t\t<type>${p.type}</type>${multiple}${mandatory}${constraint}\n\t</property>`;
 
-
-			//return `\t<property name="${name}">\n\t\t<title>${escapeXml(p.title || p.tech)}</title>\n\t\t<type>${p.type}</type>${mandatory}${constraint}\n\t</property>`;
+			return `\t<property name="${name}">\n\t\t<title>${escapeXml(p.title || p.tech)}</title>\n\t\t<type>${p.type}</type>${mandatory}${constraint}\n\t</property>`;
 		});
 
 		const wrap = currentProject?.options?.includeContainers;
