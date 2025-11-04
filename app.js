@@ -445,7 +445,7 @@
 		const dynlistId = $("#propDynlistSelect").value || "";
 		const showForView = $("#propShowForView").checked;
 		const showForce = $("#propShowForce").checked;
-		const multiple = $("#propMultiple").checked;
+		//const multiple = $("#propMultiple").checked;
 
 		let hierarchy = null;
 		if (type === "d:noderef") {
@@ -467,7 +467,7 @@
 			tech,
 			title,
 			type,
-			general: { mandatoryModel, multiple },
+			general: { mandatoryModel },
 			field: { set, mandatoryField, readOnly, helpId, textareaRows, autocompleteDs, dynlistId },
 			show: { forView: showForView, force: showForce },
 			hierarchy,
@@ -500,7 +500,7 @@
 				$("#propTitle").value = p.title || "";
 				$("#propType").value = p.type;
 				$("#propMandatoryModel").checked = !!p.general?.mandatoryModel;
-				$("#propMultiple").checked = !!p.general?.multiple;
+				//$("#propMultiple").checked = !!p.general?.multiple;
 
 				// Assure que le select Set contient la valeur
 				refreshSetSelects();
