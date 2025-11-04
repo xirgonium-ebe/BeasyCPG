@@ -156,23 +156,51 @@
 					</div>
 
 					<!-- Type de données séparé pour garder une grille propre -->
+<!--					<div class="grid three">-->
+<!--						<div class="field">-->
+<!--							<label for="propType">Type de données</label>-->
+<!--							<select id="propType" required>-->
+<!--								<option value="">— sélectionner —</option>-->
+<!--								<option>d:text</option>-->
+<!--								<option>d:mltext</option>-->
+<!--								<option>d:int</option>-->
+<!--								<option>d:double</option>-->
+<!--								<option>d:boolean</option>-->
+<!--								<option>d:date</option>-->
+<!--								<option>d:datetime</option>-->
+<!--								<option>d:noderef</option>-->
+<!--							</select>-->
+<!--						</div>-->
+<!--					</div>-->
+					
 					<div class="grid three">
-						<div class="field">
-							<label for="propType">Type de données</label>
-							<select id="propType" required>
-								<option value="">— sélectionner —</option>
-								<option>d:text</option>
-								<option>d:mltext</option>
-								<option>d:int</option>
-								<option>d:double</option>
-								<option>d:boolean</option>
-								<option>d:date</option>
-								<option>d:datetime</option>
-								<option>d:noderef</option>
-							</select>
-						</div>
-					</div>
+  <div class="field">
+    <label for="propType">Type de données</label>
+    <select id="propType" required>
+      <option value="">— sélectionner —</option>
+      <option>d:text</option>
+      <option>d:mltext</option>
+      <option>d:int</option>
+      <option>d:double</option>
+      <option>d:boolean</option>
+      <option>d:date</option>
+      <option>d:datetime</option>
+      <option>d:noderef</option>
+    </select>
+  </div>
 
+  <!-- NEW: Multiple -->
+  <div class="field inline">
+    <label class="switch">
+      <input id="propMultiple" type="checkbox" />
+      <span class="slider"></span>
+    </label>
+    <div>
+      <strong>Multiple (model)</strong><br />
+      <small class="muted">Ajoute <code>&lt;multiple&gt;true&lt;/multiple&gt;</code> si une contrainte est définie.</small>
+    </div>
+  </div>
+</div>
 
 					<div class="field inline">
 						<label class="switch">
