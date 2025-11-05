@@ -290,6 +290,15 @@
 
 	function loadProjectIntoForm() {
 		if (!currentProject) return;
+
+		// MIGRATION: garantir general.multiple
+		(currentProject.props || []).forEach(p => {
+			p.general = p.general || {};
+			if (typeof p.general.multiple === "undefined") {
+				p.general.multiple = false;
+			}
+		});
+
 		$("#projectName").value = currentProject.name || "";
 		$("#projectNamespace").value = currentProject.namespace || "jdi";
 		$("#projectSets").value = (currentProject.sets || []).join(", ");
@@ -445,7 +454,7 @@
 		const dynlistId = $("#propDynlistSelect").value || "";
 		const showForView = $("#propShowForView").checked;
 		const showForce = $("#propShowForce").checked;
-		const multiple = $("#propMultiple").checked;
+		const multiple = !!$("#propMultiple")?.checked; 
 
 		let hierarchy = null;
 		if (type === "d:noderef") {
@@ -468,7 +477,7 @@
 			title,
 			type,
 			//general: { mandatoryModel },
-			general: { mandatoryModel, multiple},           
+			general: { mandatoryModel, multiple },
 			field: { set, mandatoryField, readOnly, helpId, textareaRows, autocompleteDs, dynlistId },
 			show: { forView: showForView, force: showForce },
 			hierarchy,
@@ -899,7 +908,7 @@
 			const mandatory = p.general?.mandatoryModel ? `\n\t\t\t<mandatory>true</mandatory>` : "";
 			let constraint = "";
 			let hasConstraint = false;
-			
+
 			if (p.type === "d:text" && p.field?.dynlistId) {
 				const dl = (currentProject.dynlists || []).find((d) => d.techName === p.field.dynlistId);
 				if (dl) {
