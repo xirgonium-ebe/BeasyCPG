@@ -445,7 +445,7 @@
 		const dynlistId = $("#propDynlistSelect").value || "";
 		const showForView = $("#propShowForView").checked;
 		const showForce = $("#propShowForce").checked;
-		//const multiple = $("#propMultiple").checked;
+		const multiple = $("#propMultiple").checked;
 
 		let hierarchy = null;
 		if (type === "d:noderef") {
@@ -500,7 +500,7 @@
 				$("#propTitle").value = p.title || "";
 				$("#propType").value = p.type;
 				$("#propMandatoryModel").checked = !!p.general?.mandatoryModel;
-				//$("#propMultiple").checked = !!p.general?.multiple;
+				$("#propMultiple").checked = !!p.general?.multiple;
 
 				// Assure que le select Set contient la valeur
 				refreshSetSelects();
@@ -894,20 +894,23 @@
 			const name = nsId(p.tech);
 			const mandatory = p.general?.mandatoryModel ? `\n\t\t\t<mandatory>true</mandatory>` : "";
 			let constraint = "";
+			let hasConstraint = false;
+			
 			if (p.type === "d:text" && p.field?.dynlistId) {
 				const dl = (currentProject.dynlists || []).find((d) => d.techName === p.field.dynlistId);
 				if (dl) {
 					const cName = dl.constraintName || `${currentProject.namespace}:${dl.techName}Constraint`;
 					constraint = `\n\t\t\t<constraints>\n\t\t\t\t<constraint ref="${cName}" />\n\t\t\t</constraints>`;
+					hasConstraint = true;
 				}
 			}
 
 			// NEW — multiple uniquement si une contrainte est présente
-			//const multiple = p.general?.multiple && hasConstraint ? `\n\t\t\t<multiple>true</multiple>` : "";
-			//return `\t<property name="${name}">\n\t\t<title>${escapeXml(p.title || p.tech)}</title>\n\t\t<type>${p.type}</type>${multiple}${mandatory}${constraint}\n\t</property>`;
+			const multiple = p.general?.multiple && hasConstraint ? `\n\t\t\t<multiple>true</multiple>` : "";
+			return `\t<property name="${name}">\n\t\t<title>${escapeXml(p.title || p.tech)}</title>\n\t\t<type>${p.type}</type>${multiple}${mandatory}${constraint}\n\t</property>`;
 
 
-			return `\t<property name="${name}">\n\t\t<title>${escapeXml(p.title || p.tech)}</title>\n\t\t<type>${p.type}</type>${mandatory}${constraint}\n\t</property>`;
+			//return `\t<property name="${name}">\n\t\t<title>${escapeXml(p.title || p.tech)}</title>\n\t\t<type>${p.type}</type>${mandatory}${constraint}\n\t</property>`;
 		});
 
 		const wrap = currentProject?.options?.includeContainers;
