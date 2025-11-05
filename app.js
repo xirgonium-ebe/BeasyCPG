@@ -526,6 +526,8 @@
 					(p.hierarchy?.levels || []).forEach((lvl) => addHierarchyLevelRow(lvl));
 				}
 				updatePropConditional();
+				//multiple add
+				updateMultipleAvailability();
 			});
 			$(".del", row).addEventListener("click", () => {
 				if (!confirm(`Supprimer la propriété "${p.tech}" ?`)) return;
