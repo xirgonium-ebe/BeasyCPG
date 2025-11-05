@@ -513,6 +513,7 @@
 				$("#propTextareaRows").value = p.field?.textareaRows || "";
 				$("#propAutocompleteDs").value = p.field?.autocompleteDs || "";
 				$("#propDynlistSelect").value = p.field?.dynlistId || "";
+				updateMultipleAvailability(); // réactive/fige le switch selon présence dynlist
 
 				$("#propShowForView").checked = !!p.show?.forView;
 				$("#propShowForce").checked = !!p.show?.force;
@@ -526,7 +527,7 @@
 					(p.hierarchy?.levels || []).forEach((lvl) => addHierarchyLevelRow(lvl));
 				}
 				updatePropConditional();
-				updateMultipleAvailability(); 
+
 			});
 			$(".del", row).addEventListener("click", () => {
 				if (!confirm(`Supprimer la propriété "${p.tech}" ?`)) return;
