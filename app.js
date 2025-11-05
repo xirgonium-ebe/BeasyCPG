@@ -420,14 +420,14 @@
 	/***********************
 	 * PROPRIÉTÉS — CRUD
 	 ***********************/
-//	function updateMultipleAvailability() {
-//		const hasDynlist = ($("#propDynlistSelect").value || "").trim() !== "";
-//		const chk = $("#propMultiple");
-//		chk.disabled = !hasDynlist;
-//	}
-//
-//	$("#propDynlistSelect")?.addEventListener("change", updateMultipleAvailability);
-//	document.addEventListener("DOMContentLoaded", updateMultipleAvailability);
+	function updateMultipleAvailability() {
+		const hasDynlist = ($("#propDynlistSelect").value || "").trim() !== "";
+		const chk = $("#propMultiple");
+		chk.disabled = !hasDynlist;
+	}
+
+	$("#propDynlistSelect")?.addEventListener("change", updateMultipleAvailability);
+	document.addEventListener("DOMContentLoaded", updateMultipleAvailability);
 
 
 
