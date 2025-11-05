@@ -468,7 +468,7 @@
 			title,
 			type,
 			//general: { mandatoryModel },
-			general: { mandatoryModel, multiple },           
+			general: { mandatoryModel, multiple},           
 			field: { set, mandatoryField, readOnly, helpId, textareaRows, autocompleteDs, dynlistId },
 			show: { forView: showForView, force: showForce },
 			hierarchy,
@@ -572,6 +572,7 @@
 
 			renderPropList();
 			refreshDynlistSelects();
+			updateMultipleAvailability();
 			autoSave();
 			generateAll();
 			Toast.show("Propriété ajoutée/mise à jour ✅");
