@@ -51,7 +51,7 @@
 		if (!ta) return;
 		ta.select();
 		document.execCommand("copy");
-		Toast.show("Contenu copié dans le presse-papiers ✅");
+		Toast.show("Contenu copié dans le presse-papiers OK");
 	}
 
 	function normalizeCsvSeparatorToSemicolon(text) {
@@ -376,7 +376,7 @@
 				includeContainers: $("#toggleContainers").checked,
 			};
 			await DB.put(STORE_PROJECTS, currentProject);
-			Toast.show("Projet sauvegardé ✅", "info");
+			Toast.show("Projet sauvegardé OK", "info");
 			refreshProjectPicker();
 			refreshSetSelects(); // NEW
 			generateAll();
@@ -584,7 +584,7 @@
 			updateMultipleAvailability();
 			autoSave();
 			generateAll();
-			Toast.show("Propriété ajoutée/mise à jour ✅");
+			Toast.show("Propriété ajoutée/mise à jour OK");
 		});
 	}
 
@@ -684,7 +684,7 @@
 			renderAssocList();
 			autoSave();
 			generateAll();
-			Toast.show("Association ajoutée/mise à jour ✅");
+			Toast.show("Association ajoutée/mise à jour OK");
 		});
 	}
 
@@ -813,7 +813,7 @@
 			refreshDynlistSelects();
 			autoSave();
 			generateAll();
-			Toast.show("Dynlist ajoutée/mise à jour ✅");
+			Toast.show("Dynlist ajoutée/mise à jour OK");
 		});
 	}
 
@@ -913,13 +913,13 @@
 				const dl = (currentProject.dynlists || []).find((d) => d.techName === p.field.dynlistId);
 				if (dl) {
 					const cName = dl.constraintName || `${currentProject.namespace}:${dl.techName}Constraint`;
-					constraint = `\n\t\t\t<constraints>\n\t\t\t\t<constraint ref="${cName}" />\n\t\t\t</constraints>`;
+					constraint = `\n\t\t\t<constraints>\n\t\t\t<constraint ref="${cName}" />\n\t\t\t</constraints>`;
 					hasConstraint = true;
 				}
 			}
 
 			// NEW — multiple uniquement si une contrainte est présente
-			const multiple = p.general?.multiple && hasConstraint ? `\n\t\t\t<multiple>true</multiple>` : "";
+			const multiple = p.general?.multiple && hasConstraint ? `\n\t\t<multiple>true</multiple>` : "";
 			return `\t<property name="${name}">\n\t\t<title>${escapeXml(p.title || p.tech)}</title>\n\t\t<type>${p.type}</type>${multiple}${mandatory}${constraint}\n\t</property>`;
 
 
@@ -1101,11 +1101,11 @@
 			DB.put(STORE_PROJECTS, currentProject).then(() => {
 				loadProjectIntoForm();
 				refreshProjectPicker();
-				Toast.show("Projet importé ✅");
+				Toast.show("Projet importé OK");
 			});
 		} catch (e) {
 			console.error(e);
-			Toast.show("JSON invalide ❌", "warn");
+			Toast.show("JSON invalide !!!", "warn");
 		}
 	}
 
@@ -1178,7 +1178,7 @@
 			].join("\n");
 			try {
 				await navigator.clipboard.writeText(all);
-				Toast.show("Toutes les sections copiées ✅");
+				Toast.show("Toutes les sections copiées OK");
 			} catch {
 				const ta = document.createElement("textarea");
 				ta.value = all;
@@ -1186,7 +1186,7 @@
 				ta.select();
 				document.execCommand("copy");
 				ta.remove();
-				Toast.show("Toutes les sections copiées ✅");
+				Toast.show("Toutes les sections copiées OK");
 			}
 		});
 	}
@@ -1204,7 +1204,7 @@
 			currentProject = emptyProject();
 			loadProjectIntoForm();
 			refreshProjectPicker();
-			Toast.show("IndexedDB réinitialisée 🧨", "warn");
+			Toast.show("IndexedDB réinitialisée !!", "warn");
 		});
 
 		$("#vacuumDbBtn").addEventListener("click", async () => {
