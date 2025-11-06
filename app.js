@@ -913,7 +913,7 @@
 				const dl = (currentProject.dynlists || []).find((d) => d.techName === p.field.dynlistId);
 				if (dl) {
 					const cName = dl.constraintName || `${currentProject.namespace}:${dl.techName}Constraint`;
-					constraint = `\n\t\t\t<constraints>\n\t\t\t<constraint ref="${cName}" />\n\t\t\t</constraints>`;
+					constraint = `\n\t\t<constraints>\n\t\t\t<constraint ref="${cName}" />\n\t\t</constraints>`;
 					hasConstraint = true;
 				}
 			}
