@@ -1043,7 +1043,15 @@
 			if (p.show?.force) attrs.push(`force="true"`);
 			return `\t<show id="${id}"${attrs.length ? " " + attrs.join(" ") : ""} />`;
 		});
-		return items.join("\n");
+		const assocShow = (currentProject.assocs || []).map((p) => {
+			const id = `${ns}:${p.tech}`;
+			const attrs = [];
+			//A rajouter pour faire comme prop. Oubli
+			//if (p.show?.forView) attrs.push(`for-mode="view"`);
+			//if (p.show?.force) attrs.push(`force="true"`);
+			return `\t<show id="${id}"${attrs.length ? " " + attrs.join(" ") : ""} />`;
+		});
+		return items.join("\n")+assocShow.join("\n");
 	}
 
 	/***********************
